@@ -1,0 +1,33 @@
+{
+  "name": "Compas Admin Dashboard",
+  "short_name": "Compas Admin",
+  "description": "Admin dashboard for managing events, users, and bookings",
+  "start_url": "/admin",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#c0f75b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/1024.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/1024.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "lang": "en",
+  "dir": "ltr"
+}
