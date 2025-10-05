@@ -12,6 +12,7 @@ interface AdminSidebarProps {
 const menuItems = [
   { href: '/admin', label: 'Dashboard' },
   { href: '/admin/events', label: 'Events' },
+  { href: '/admin/movies', label: 'Movies' },
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/bookings', label: 'Bookings' },
   { href: '/admin/payments', label: 'Payments' },
@@ -93,6 +94,7 @@ export default function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
                   <span className="w-5 h-5 text-center">
                     {item.label === 'Dashboard' && '📊'}
                     {item.label === 'Events' && '🎬'}
+                    {item.label === 'Movies' && '🎞️'}
                     {item.label === 'Users' && '👥'}
                     {item.label === 'Bookings' && '🎫'}
                     {item.label === 'Payments' && '💳'}
