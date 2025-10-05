@@ -332,8 +332,14 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
       // Clean up data before sending
       const cleanedData = {
         ...formData,
-        cast: formData.cast?.filter(member => member.person && member.character) || [],
-        crew: formData.crew?.filter(member => member.person && member.job) || []
+        cast: formData.cast?.filter(member => member.person && member.character).map(member => ({
+          ...member,
+          person: persons.find(p => p.name === member.person)?.id || member.person
+        })) || [],
+        crew: formData.crew?.filter(member => member.person && member.job).map(member => ({
+          ...member,
+          person: persons.find(p => p.name === member.person)?.id || member.person
+        })) || []
       }
       await onSubmit(cleanedData)
     } finally {
@@ -1000,8 +1006,14 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
       // Clean up data before sending
       const cleanedData = {
         ...formData,
-        cast: formData.cast?.filter(member => member.person && member.character) || [],
-        crew: formData.crew?.filter(member => member.person && member.job) || []
+        cast: formData.cast?.filter(member => member.person && member.character).map(member => ({
+          ...member,
+          person: persons.find(p => p.name === member.person)?.id || member.person
+        })) || [],
+        crew: formData.crew?.filter(member => member.person && member.job).map(member => ({
+          ...member,
+          person: persons.find(p => p.name === member.person)?.id || member.person
+        })) || []
       }
       await onSubmit(cleanedData)
     } finally {
