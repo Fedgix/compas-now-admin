@@ -330,17 +330,31 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
     setLoading(true)
     try {
       // Clean up data before sending
+      console.log('Persons array:', persons)
+      console.log('Original cast:', formData.cast)
+      console.log('Original crew:', formData.crew)
+      
       const cleanedData = {
         ...formData,
-        cast: formData.cast?.filter(member => member.person && member.character).map(member => ({
-          ...member,
-          person: persons.find(p => p.name === member.person)?.id || member.person
-        })) || [],
-        crew: formData.crew?.filter(member => member.person && member.job).map(member => ({
-          ...member,
-          person: persons.find(p => p.name === member.person)?.id || member.person
-        })) || []
+        cast: formData.cast?.filter(member => member.person && member.character).map(member => {
+          const personObj = persons.find(p => p.name === member.person)
+          console.log(`Finding person "${member.person}":`, personObj)
+          return {
+            ...member,
+            person: personObj?.id || member.person
+          }
+        }) || [],
+        crew: formData.crew?.filter(member => member.person && member.job).map(member => {
+          const personObj = persons.find(p => p.name === member.person)
+          console.log(`Finding person "${member.person}":`, personObj)
+          return {
+            ...member,
+            person: personObj?.id || member.person
+          }
+        }) || []
       }
+      
+      console.log('Cleaned data:', cleanedData)
       await onSubmit(cleanedData)
     } finally {
       setLoading(false)
@@ -1004,17 +1018,31 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
     setLoading(true)
     try {
       // Clean up data before sending
+      console.log('Persons array:', persons)
+      console.log('Original cast:', formData.cast)
+      console.log('Original crew:', formData.crew)
+      
       const cleanedData = {
         ...formData,
-        cast: formData.cast?.filter(member => member.person && member.character).map(member => ({
-          ...member,
-          person: persons.find(p => p.name === member.person)?.id || member.person
-        })) || [],
-        crew: formData.crew?.filter(member => member.person && member.job).map(member => ({
-          ...member,
-          person: persons.find(p => p.name === member.person)?.id || member.person
-        })) || []
+        cast: formData.cast?.filter(member => member.person && member.character).map(member => {
+          const personObj = persons.find(p => p.name === member.person)
+          console.log(`Finding person "${member.person}":`, personObj)
+          return {
+            ...member,
+            person: personObj?.id || member.person
+          }
+        }) || [],
+        crew: formData.crew?.filter(member => member.person && member.job).map(member => {
+          const personObj = persons.find(p => p.name === member.person)
+          console.log(`Finding person "${member.person}":`, personObj)
+          return {
+            ...member,
+            person: personObj?.id || member.person
+          }
+        }) || []
       }
+      
+      console.log('Cleaned data:', cleanedData)
       await onSubmit(cleanedData)
     } finally {
       setLoading(false)
