@@ -329,7 +329,13 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
     e.preventDefault()
     setLoading(true)
     try {
-      await onSubmit(formData)
+      // Clean up data before sending
+      const cleanedData = {
+        ...formData,
+        cast: formData.cast?.filter(member => member.person && member.character) || [],
+        crew: formData.crew?.filter(member => member.person && member.job) || []
+      }
+      await onSubmit(cleanedData)
     } finally {
       setLoading(false)
     }
@@ -991,7 +997,13 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
     e.preventDefault()
     setLoading(true)
     try {
-      await onSubmit(formData)
+      // Clean up data before sending
+      const cleanedData = {
+        ...formData,
+        cast: formData.cast?.filter(member => member.person && member.character) || [],
+        crew: formData.crew?.filter(member => member.person && member.job) || []
+      }
+      await onSubmit(cleanedData)
     } finally {
       setLoading(false)
     }
