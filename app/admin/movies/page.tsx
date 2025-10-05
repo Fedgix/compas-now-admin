@@ -341,7 +341,7 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
           console.log(`Finding person "${member.person}":`, personObj)
           return {
             ...member,
-            person: personObj?.id || member.person
+            person: personObj?._id || personObj?.id || member.person
           }
         }) || [],
         crew: formData.crew?.filter(member => member.person && member.job).map(member => {
@@ -349,7 +349,7 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
           console.log(`Finding person "${member.person}":`, personObj)
           return {
             ...member,
-            person: personObj?.id || member.person
+            person: personObj?._id || personObj?.id || member.person
           }
         }) || []
       }
@@ -1029,7 +1029,7 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
           console.log(`Finding person "${member.person}":`, personObj)
           return {
             ...member,
-            person: personObj?.id || member.person
+            person: personObj?._id || personObj?.id || member.person
           }
         }) || [],
         crew: formData.crew?.filter(member => member.person && member.job).map(member => {
@@ -1037,7 +1037,7 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
           console.log(`Finding person "${member.person}":`, personObj)
           return {
             ...member,
-            person: personObj?.id || member.person
+            person: personObj?._id || personObj?.id || member.person
           }
         }) || []
       }
