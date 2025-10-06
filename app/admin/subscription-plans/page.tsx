@@ -96,16 +96,8 @@ export default function SubscriptionPlansPage() {
       const response = await subscriptionPlanApi.getAllSubscriptionPlans()
       console.log('API Response:', response)
       
-      // Handle API response structure: { success: true, data: [...], pagination: {...} }
-      let plansData = []
-      if (response && typeof response === 'object') {
-        if (response.data && Array.isArray(response.data)) {
-          plansData = response.data
-        } else if (Array.isArray(response)) {
-          plansData = response
-        }
-      }
-      
+      // API returns {success: true, data: Array, pagination: {...}}
+      const plansData = response?.data && Array.isArray(response.data) ? response.data : []
       setPlans(plansData)
       setError(null)
     } catch (err) {
@@ -121,7 +113,11 @@ export default function SubscriptionPlansPage() {
     e.preventDefault()
     try {
       if (editingPlan) {
-        await subscriptionPlanApi.updateSubscriptionPlan(editingPlan.id, formData)
+        const planId = editingPlan.id || editingPlan._id
+        if (!planId) {
+          throw new Error('Plan ID is required for editing')
+        }
+        await subscriptionPlanApi.updateSubscriptionPlan(planId, formData)
         } else {
         await subscriptionPlanApi.createSubscriptionPlan(formData)
       }
@@ -406,7 +402,7 @@ export default function SubscriptionPlansPage() {
         <div className="bg-gray-800 shadow overflow-hidden sm:rounded-md border border-gray-700">
           <ul className="divide-y divide-gray-700">
             {Array.isArray(plans) && plans.length > 0 ? plans.map((plan) => (
-              <li key={plan.id} className="px-6 py-4">
+              <li key={plan.id || plan._id} className="px-6 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">

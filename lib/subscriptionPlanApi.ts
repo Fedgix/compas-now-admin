@@ -83,7 +83,7 @@ class SubscriptionPlanApi {
 
   // Update subscription plan
   async updateSubscriptionPlan(id: string, data: Partial<CreateSubscriptionPlanData>): Promise<SubscriptionPlan> {
-    return this.request<SubscriptionPlan>(`/subscription-plans/plans/${id}`, {
+    return this.request<SubscriptionPlan>(`/subscription-plans/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     })
@@ -243,25 +243,7 @@ class SubscriptionPlanApi {
     return this.request(endpoint)
   }
 
-  /**
-   * Mark plan as sold out (Admin only)
-   */
-  async markPlanAsSoldOut(planId: string, reason: string): Promise<any> {
-    return this.request('/subscription-plans/availability/sold-out', {
-      method: 'POST',
-      body: JSON.stringify({ planId, reason })
-    })
-  }
 
-  /**
-   * Reactivate plan (Admin only)
-   */
-  async reactivatePlan(planId: string): Promise<any> {
-    return this.request('/subscription-plans/availability/reactivate', {
-      method: 'POST',
-      body: JSON.stringify({ planId })
-    })
-  }
 }
 
 export const subscriptionPlanApi = new SubscriptionPlanApi()
