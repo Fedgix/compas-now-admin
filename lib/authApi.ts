@@ -138,7 +138,7 @@ class AuthApiService {
 
   getAccessToken(): string | null {
     if (typeof window === 'undefined') return null
-    return localStorage.getItem('admin_access_token')
+    return localStorage.getItem('admin_token')
   }
 
   getRefreshToken(): string | null {

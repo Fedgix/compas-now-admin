@@ -24,7 +24,7 @@ class SubscriptionPlanApi {
 
     // Get auth token from localStorage if available
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('auth_token')
+      const token = localStorage.getItem('admin_token')
       if (token) {
         defaultHeaders['Authorization'] = `Bearer ${token}`
       }
