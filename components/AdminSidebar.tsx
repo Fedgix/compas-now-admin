@@ -13,6 +13,7 @@ const menuItems = [
   { href: '/admin', label: 'Dashboard' },
   { href: '/admin/events', label: 'Events' },
   { href: '/admin/movies', label: 'Movies' },
+  { href: '/admin/persons', label: 'Persons' },
   { href: '/admin/users', label: 'Users' },
   { href: '/admin/bookings', label: 'Bookings' },
   { href: '/admin/payments', label: 'Payments' },
@@ -95,6 +96,7 @@ export default function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
                     {item.label === 'Dashboard' && '📊'}
                     {item.label === 'Events' && '🎬'}
                     {item.label === 'Movies' && '🎞️'}
+                    {item.label === 'Persons' && '👤'}
                     {item.label === 'Users' && '👥'}
                     {item.label === 'Bookings' && '🎫'}
                     {item.label === 'Payments' && '💳'}

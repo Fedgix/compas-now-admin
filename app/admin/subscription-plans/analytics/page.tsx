@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { FiTrendingUp, FiUsers, FiDollarSign, FiBarChart3, FiRefreshCw } from 'react-icons/fi'
+import { FiTrendingUp, FiUsers, FiDollarSign, FiBarChart, FiRefreshCw } from 'react-icons/fi'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { subscriptionPlanApi } from '@/lib/subscriptionPlanApi'
 
@@ -123,7 +123,7 @@ export default function SubscriptionPlansAnalyticsPage() {
                   </p>
                 </div>
                 <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
-                  <FiBarChart3 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  <FiBarChart className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
               </div>
             </motion.div>

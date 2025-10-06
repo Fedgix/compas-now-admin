@@ -313,7 +313,7 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
         const response = await movieApiService.getAllPersons({ limit: 100 })
         console.log('Persons response:', response)
         // Backend returns { status: 'success', data: persons[], pagination: {} }
-        setPersons(response?.data || [])
+        setPersons((response as any)?.data || [])
       } catch (error) {
         console.error('Error loading persons:', error)
         toast.error('Failed to load persons')
@@ -654,7 +654,7 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
                 {!formData.posterPath && !localPosterPreview && (
                   <button
                     type="button"
-                    onClick={() => document.querySelector('input[type="file"]')?.click()}
+                    onClick={() => (document.querySelector('input[type="file"]') as HTMLInputElement)?.click()}
                     className="w-full py-2 border border-dashed border-white/30 rounded text-white/60 hover:text-white hover:border-white/50 transition-colors"
                   >
                     + Add Poster Image
@@ -705,7 +705,7 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
                 {!formData.backdropPath && !localBackdropPreview && (
                   <button
                     type="button"
-                    onClick={() => document.querySelectorAll('input[type="file"]')[1]?.click()}
+                    onClick={() => (document.querySelectorAll('input[type="file"]')[1] as HTMLInputElement)?.click()}
                     className="w-full py-2 border border-dashed border-white/30 rounded text-white/60 hover:text-white hover:border-white/50 transition-colors"
                   >
                     + Add Backdrop Image
@@ -987,7 +987,7 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
         const response = await movieApiService.getAllPersons({ limit: 100 })
         console.log('Persons response:', response)
         // Backend returns { status: 'success', data: persons[], pagination: {} }
-        setPersons(response?.data || [])
+        setPersons((response as any)?.data || [])
       } catch (error) {
         console.error('Error loading persons:', error)
         toast.error('Failed to load persons')
@@ -1321,7 +1321,7 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
                 {!formData.posterPath && (
                   <button
                     type="button"
-                    onClick={() => document.querySelectorAll('input[type="file"]')[2]?.click()}
+                    onClick={() => (document.querySelectorAll('input[type="file"]')[2] as HTMLInputElement)?.click()}
                     className="w-full py-2 border border-dashed border-white/30 rounded text-white/60 hover:text-white hover:border-white/50 transition-colors"
                   >
                     + Add New Poster
@@ -1365,7 +1365,7 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
                 {!formData.backdropPath && (
                   <button
                     type="button"
-                    onClick={() => document.querySelectorAll('input[type="file"]')[3]?.click()}
+                    onClick={() => (document.querySelectorAll('input[type="file"]')[3] as HTMLInputElement)?.click()}
                     className="w-full py-2 border border-dashed border-white/30 rounded text-white/60 hover:text-white hover:border-white/50 transition-colors"
                   >
                     + Add New Backdrop
