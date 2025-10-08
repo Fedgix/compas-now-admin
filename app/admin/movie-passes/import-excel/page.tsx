@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { FiUpload, FiFile, FiCheckCircle, FiAlertCircle, FiX, FiDownload, FiInfo } from 'react-icons/fi'
 import { moviePassApi } from '@/lib/moviePassApi'
 import { authApiService } from '@/lib/authApi'
+import { subscriptionPlanApi } from '@/lib/subscriptionPlanApi'
 import { useRouter } from 'next/navigation'
 
 interface UploadResult {
@@ -33,18 +34,21 @@ export default function ImportExcelPage() {
   const [success, setSuccess] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [availablePlans, setAvailablePlans] = useState<any[]>([])
+  const [loadingPlans, setLoadingPlans] = useState(false)
   
   // Form data
-  const [planId, setPlanId] = useState('68e32f69118b2ded55539180') // Default SILVER plan ID
+  const [planId, setPlanId] = useState('')
   const [planType, setPlanType] = useState('SILVER')
   const [batchName, setBatchName] = useState('Silver Batch - October 2025')
   const [expiryDays, setExpiryDays] = useState(30)
 
-  // Check authentication on component mount
+  // Check authentication and load plans on component mount
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       if (authApiService.isAuthenticated()) {
         setIsAuthenticated(true)
+        await loadAvailablePlans()
       } else {
         router.push('/admin/login')
       }
@@ -53,6 +57,43 @@ export default function ImportExcelPage() {
     
     checkAuth()
   }, [router])
+
+  // Load available subscription plans
+  const loadAvailablePlans = async () => {
+    setLoadingPlans(true)
+    try {
+      console.log('🔄 Loading subscription plans...')
+      const response = await subscriptionPlanApi.getAllSubscriptionPlans()
+      console.log('📋 Plans response:', response)
+      
+      // Handle response structure - check if it has 'data' property
+      const plansData = response?.data || response
+      
+      if (plansData && Array.isArray(plansData)) {
+        setAvailablePlans(plansData)
+        console.log('✅ Plans loaded:', plansData)
+        console.log('📋 First plan structure:', plansData[0])
+        
+        // Set default plan if available
+        if (plansData.length > 0) {
+          const defaultPlan = plansData.find(plan => (plan.planId || plan.name) === 'SILVER') || plansData[0]
+          console.log('🎯 Default plan selected:', defaultPlan)
+          console.log('🔍 Default plan ID:', defaultPlan._id || defaultPlan.id)
+          console.log('🔍 Default plan type:', defaultPlan.planId || defaultPlan.name)
+          setPlanId(defaultPlan._id || defaultPlan.id)
+          setPlanType(defaultPlan.planId || defaultPlan.name)
+        }
+      } else {
+        console.error('❌ No plans data in response:', response)
+        setError('No subscription plans found')
+      }
+    } catch (error) {
+      console.error('❌ Error loading plans:', error)
+      setError('Failed to load subscription plans: ' + (error instanceof Error ? error.message : 'Unknown error'))
+    } finally {
+      setLoadingPlans(false)
+    }
+  }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
@@ -88,7 +129,7 @@ export default function ImportExcelPage() {
     }
 
     if (!planId || !planType || !batchName || !expiryDays) {
-      setError('Please fill in all required fields')
+      setError('Please fill in all required fields: Select a subscription plan, Batch Name, and Expiry Days')
       return
     }
 
@@ -126,7 +167,7 @@ export default function ImportExcelPage() {
     setResult(null)
     setError(null)
     setSuccess(null)
-    setPlanId('68e32f69118b2ded55539180')
+    setPlanId('')
     setPlanType('SILVER')
     setBatchName('Silver Batch - October 2025')
     setExpiryDays(30)
@@ -263,36 +304,156 @@ export default function ImportExcelPage() {
               </div>
             </div>
 
-            {/* Plan Type */}
+            {/* Subscription Plan Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Plan Type *
+                Select Subscription Plan *
               </label>
-              <select
-                value={planType}
-                onChange={(e) => setPlanType(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
-                disabled={uploading}
-              >
-                <option value="SILVER">SILVER</option>
-                <option value="GOLD">GOLD</option>
-              </select>
+              {loadingPlans ? (
+                <div className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-gray-400 rounded-md flex items-center gap-2">
+                  <div className="animate-spin h-4 w-4 border-2 border-gray-400 border-t-transparent rounded-full"></div>
+                  Loading plans...
+                </div>
+              ) : (
+                <select
+                  value={planId}
+                  onChange={(e) => {
+                    console.log('🔄 Plan selection changed:', e.target.value)
+                    console.log('📋 Available plans:', availablePlans)
+                    const selectedPlan = availablePlans.find(plan => (plan._id || plan.id) === e.target.value)
+                    console.log('🎯 Selected plan:', selectedPlan)
+                    if (selectedPlan) {
+                      setPlanId(selectedPlan._id || selectedPlan.id)
+                      setPlanType(selectedPlan.planId || selectedPlan.name)
+                      console.log('✅ Plan updated - ID:', selectedPlan._id || selectedPlan.id, 'Type:', selectedPlan.planId || selectedPlan.name)
+                    } else {
+                      console.error('❌ Plan not found for ID:', e.target.value)
+                    }
+                  }}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+                  disabled={uploading}
+                >
+                  <option value="">Select a plan...</option>
+                  {availablePlans.map((plan) => (
+                    <option key={plan._id || plan.id} value={plan._id || plan.id}>
+                      {plan.planId || plan.name} - {plan.displayName || plan.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
 
-            {/* Plan ID */}
+            {/* Plan Type (Read-only) */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Plan ID *
+                Plan Type
+              </label>
+              <input
+                type="text"
+                value={planType}
+                readOnly
+                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-gray-300 rounded-md cursor-not-allowed"
+                placeholder="Will be set automatically"
+              />
+            </div>
+
+            {/* Plan ID (Read-only) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Plan ID
               </label>
               <input
                 type="text"
                 value={planId}
-                onChange={(e) => setPlanId(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary placeholder-gray-400"
-                placeholder="Enter plan ID"
-                disabled={uploading}
+                readOnly
+                className="w-full px-3 py-2 bg-gray-600 border border-gray-500 text-gray-300 rounded-md cursor-not-allowed"
+                placeholder="Will be set automatically"
               />
             </div>
+
+            {/* Loading Plans Message */}
+            {loadingPlans && (
+              <div className="md:col-span-2 p-4 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="animate-spin h-5 w-5 border-2 border-yellow-400 border-t-transparent rounded-full"></div>
+                  <span className="text-yellow-300">Loading subscription plans from server...</span>
+                </div>
+              </div>
+            )}
+
+            {/* No Plans Available */}
+            {!loadingPlans && availablePlans.length === 0 && (
+              <div className="md:col-span-2 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <FiAlertCircle className="h-5 w-5 text-red-400" />
+                  <span className="text-red-300">No subscription plans found. Please create a plan first.</span>
+                </div>
+              </div>
+            )}
+
+            {/* Selected Plan Preview */}
+            {planId && !loadingPlans && (
+              <div className="md:col-span-2 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <FiInfo className="h-5 w-5 text-blue-400" />
+                  <h3 className="text-lg font-medium text-blue-300">Selected Plan Preview</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-blue-200">Plan Type:</span>
+                      <span className="text-white font-medium">{planType}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-200">Plan ID:</span>
+                      <span className="text-white font-mono text-sm">{planId}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {availablePlans.find(plan => (plan._id || plan.id) === planId) && (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-blue-200">Plan Name:</span>
+                          <span className="text-white">
+                            {availablePlans.find(plan => (plan._id || plan.id) === planId)?.displayName || 
+                             availablePlans.find(plan => (plan._id || plan.id) === planId)?.name || 'N/A'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-blue-200">Status:</span>
+                          <span className={`px-2 py-1 rounded text-xs ${
+                            availablePlans.find(plan => (plan._id || plan.id) === planId)?.isActive 
+                              ? 'bg-green-900/50 text-green-300' 
+                              : 'bg-red-900/50 text-red-300'
+                          }`}>
+                            {availablePlans.find(plan => (plan._id || plan.id) === planId)?.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Debug Info (only in development) */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="md:col-span-2 p-3 bg-gray-700 rounded-md text-xs">
+                <div className="text-gray-400 mb-2">Debug Info:</div>
+                <div>Available Plans: {availablePlans.length}</div>
+                <div>Selected Plan ID: {planId || 'None'}</div>
+                <div>Selected Plan Type: {planType || 'None'}</div>
+                <div>Loading Plans: {loadingPlans ? 'Yes' : 'No'}</div>
+                {availablePlans.length > 0 && (
+                  <div className="mt-2">
+                    <div className="text-gray-400">First Plan:</div>
+                    <div>ID: {availablePlans[0]._id || availablePlans[0].id}</div>
+                    <div>Type: {availablePlans[0].planId || availablePlans[0].name}</div>
+                    <div>Name: {availablePlans[0].displayName || availablePlans[0].name || 'N/A'}</div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Batch Name */}
             <div>
@@ -331,7 +492,7 @@ export default function ImportExcelPage() {
           <div className="flex gap-4 mt-6">
             <button
               onClick={handleUpload}
-              disabled={uploading || !file}
+              disabled={uploading || !file || !planId}
               className="px-6 py-2 bg-primary text-black rounded-md hover:bg-primary/90 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {uploading ? (
