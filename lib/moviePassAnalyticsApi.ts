@@ -77,25 +77,43 @@ class MoviePassAnalyticsApi {
 
   async getOverviewMetrics(): Promise<AnalyticsMetrics> {
     try {
-      // Use simpler endpoint that doesn't require complex auth
-      const moviePassStats: any = await apiService.get(`${this.moviePassPath}/batches/statistics`)
+      // Get all batches and calculate totals from batch data
+      const batchesResponse: any = await this.getAllBatches()
       
-      // Calculate total revenue from batch stats if available
-      const totalRevenue = 0 // Will be calculated from actual data
-
+      // Handle both array response and {status: 'success', data} response
+      let batches: any[] = []
+      if (Array.isArray(batchesResponse)) {
+        batches = batchesResponse
+      } else if (batchesResponse && batchesResponse.status === 'success' && batchesResponse.data) {
+        batches = batchesResponse.data
+      } else if (batchesResponse && batchesResponse.data && Array.isArray(batchesResponse.data)) {
+        batches = batchesResponse.data
+      }
+      
+      // Calculate totals from batches
+      const totalPasses = batches.reduce((sum, batch) => sum + (batch.totalMoviePasses || 0), 0)
+      const usedPasses = batches.reduce((sum, batch) => sum + (batch.usedMoviePasses || 0), 0)
+      const availablePasses = batches.reduce((sum, batch) => sum + (batch.availableMoviePasses || 0), 0)
+      
       return {
-        totalPasses: moviePassStats.totalMoviePasss || 0,
-        usedPasses: moviePassStats.usedMoviePasss || 0,
-        availablePasses: moviePassStats.availableMoviePasss || 0,
-        totalRevenue: totalRevenue,
-        usageRate: moviePassStats.totalMoviePasss > 0 
-          ? (moviePassStats.usedMoviePasss / moviePassStats.totalMoviePasss) * 100 
-          : 0,
+        totalPasses,
+        usedPasses,
+        availablePasses,
+        totalRevenue: 0, // Will be calculated from subscription analytics
+        usageRate: totalPasses > 0 ? (usedPasses / totalPasses) * 100 : 0,
         growth: 12 // TODO: Calculate from historical data
       }
     } catch (error) {
       console.error('Error fetching overview metrics:', error)
-      throw error
+      // Return default values on error
+      return {
+        totalPasses: 0,
+        usedPasses: 0,
+        availablePasses: 0,
+        totalRevenue: 0,
+        usageRate: 0,
+        growth: 0
+      }
     }
   }
 
