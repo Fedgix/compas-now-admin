@@ -77,10 +77,13 @@ class MoviePassAnalyticsApi {
 
   async getOverviewMetrics(): Promise<AnalyticsMetrics> {
     try {
-      // Get all batches and calculate totals from batch data
-      const batchesResponse: any = await this.getAllBatches()
+      // Get batches and subscription analytics in parallel
+      const [batchesResponse, bundleStatsResponse] = await Promise.all([
+        this.getAllBatches(),
+        this.getBundlePurchaseStats().catch(() => null) // Don't fail if this endpoint fails
+      ])
       
-      // Handle both array response and {status: 'success', data} response
+      // Handle batches response
       let batches: any[] = []
       if (Array.isArray(batchesResponse)) {
         batches = batchesResponse
@@ -95,11 +98,17 @@ class MoviePassAnalyticsApi {
       const usedPasses = batches.reduce((sum, batch) => sum + (batch.usedMoviePasses || 0), 0)
       const availablePasses = batches.reduce((sum, batch) => sum + (batch.availableMoviePasses || 0), 0)
       
+      // Get revenue from subscription analytics
+      let totalRevenue = 0
+      if (bundleStatsResponse && bundleStatsResponse.totalRevenue) {
+        totalRevenue = bundleStatsResponse.totalRevenue
+      }
+      
       return {
         totalPasses,
         usedPasses,
         availablePasses,
-        totalRevenue: 0, // Will be calculated from subscription analytics
+        totalRevenue,
         usageRate: totalPasses > 0 ? (usedPasses / totalPasses) * 100 : 0,
         growth: 12 // TODO: Calculate from historical data
       }
