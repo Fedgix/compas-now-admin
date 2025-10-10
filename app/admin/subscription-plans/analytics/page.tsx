@@ -9,33 +9,42 @@ import { subscriptionPlanApi } from '@/lib/subscriptionPlanApi'
 interface AnalyticsData {
   bundleStats: {
     totalBundles: number
+    totalCoupons: number
     totalRevenue: number
+    averageBundleSize: number
     averageBundleValue: number
-    bundlesThisMonth: number
   }
-  planComparison: {
-    silver: {
-      totalPurchases: number
-      totalRevenue: number
-      averageValue: number
+  planComparison: Array<{
+    _id: string
+    totalBundles: number
+    totalCoupons: number
+    totalRevenue: number
+    averageBundleSize: number
+    averageRevenue: number
+    planDetails: {
+      couponPrice: number
+      pvrValue: number
+      validDays: string[]
     }
-    gold: {
-      totalPurchases: number
-      totalRevenue: number
-      averageValue: number
-    }
-  }
-  utilizationStats: {
-    totalCouponsGenerated: number
-    totalCouponsUsed: number
-    utilizationRate: number
-    unusedCoupons: number
-  }
+  }>
+  utilizationStats: Array<{
+    _id: string
+    totalBundles: number
+    averageUtilization: number
+    fullyUsedBundles: number
+    expiredBundles: number
+    activeBundles: number
+  }>
 }
 
 export default function SubscriptionPlansAnalyticsPage() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const getAverageUtilization = () => {
+    if (!analytics?.utilizationStats || analytics.utilizationStats.length === 0) return 0
+    return Math.round(analytics.utilizationStats.reduce((sum, s) => sum + s.averageUtilization, 0) / analytics.utilizationStats.length)
+  }
 
   const fetchAnalytics = async () => {
     try {
@@ -43,28 +52,21 @@ export default function SubscriptionPlansAnalyticsPage() {
       
       // Fetch all analytics data in parallel
       const [bundleStatsResponse, planComparisonResponse, utilizationResponse] = await Promise.all([
-        subscriptionPlanApi.analytics.getBundleStats(),
-        subscriptionPlanApi.analytics.getPlanComparison(),
-        subscriptionPlanApi.analytics.getUtilizationStats()
+        subscriptionPlanApi.getBundlePurchaseStats(),
+        subscriptionPlanApi.getPlanComparison(),
+        subscriptionPlanApi.getBundleUtilizationStats()
       ])
       
       setAnalytics({
-        bundleStats: bundleStatsResponse.data || {
+        bundleStats: bundleStatsResponse || {
           totalBundles: 0,
+          totalCoupons: 0,
           totalRevenue: 0,
-          averageBundleValue: 0,
-          bundlesThisMonth: 0
+          averageBundleSize: 0,
+          averageBundleValue: 0
         },
-        planComparison: planComparisonResponse.data || {
-          silver: { totalPurchases: 0, totalRevenue: 0, averageValue: 0 },
-          gold: { totalPurchases: 0, totalRevenue: 0, averageValue: 0 }
-        },
-        utilizationStats: utilizationResponse.data || {
-          totalCouponsGenerated: 0,
-          totalCouponsUsed: 0,
-          utilizationRate: 0,
-          unusedCoupons: 0
-        }
+        planComparison: planComparisonResponse || [],
+        utilizationStats: utilizationResponse || []
       })
     } catch (error) {
       console.error('Error fetching analytics:', error)
@@ -176,7 +178,7 @@ export default function SubscriptionPlansAnalyticsPage() {
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-400">This Month</p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {analytics?.bundleStats.bundlesThisMonth || 0}
+                    {analytics?.bundleStats.totalBundles || 0}
                   </p>
                 </div>
                 <div className="p-3 bg-orange-100 dark:bg-orange-900 rounded-full">
@@ -211,19 +213,19 @@ export default function SubscriptionPlansAnalyticsPage() {
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center">
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {analytics?.planComparison.silver.totalPurchases || 0}
+                        {analytics?.planComparison.find(p => p._id === 'SILVER')?.totalBundles || 0}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Purchases</p>
                     </div>
                     <div className="text-center">
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        ₹{analytics?.planComparison.silver.totalRevenue || 0}
+                        ₹{analytics?.planComparison.find(p => p._id === 'SILVER')?.totalRevenue || 0}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Revenue</p>
                     </div>
                     <div className="text-center">
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        ₹{analytics?.planComparison.silver.averageValue || 0}
+                        ₹{analytics?.planComparison.find(p => p._id === 'SILVER')?.averageRevenue || 0}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Avg Value</p>
                     </div>
@@ -242,19 +244,19 @@ export default function SubscriptionPlansAnalyticsPage() {
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center">
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {analytics?.planComparison.gold.totalPurchases || 0}
+                        {analytics?.planComparison.find(p => p._id === 'GOLD')?.totalBundles || 0}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Purchases</p>
                     </div>
                     <div className="text-center">
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        ₹{analytics?.planComparison.gold.totalRevenue || 0}
+                        ₹{analytics?.planComparison.find(p => p._id === 'GOLD')?.totalRevenue || 0}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Revenue</p>
                     </div>
                     <div className="text-center">
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                        ₹{analytics?.planComparison.gold.averageValue || 0}
+                        ₹{analytics?.planComparison.find(p => p._id === 'GOLD')?.averageRevenue || 0}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Avg Value</p>
                     </div>
@@ -294,12 +296,12 @@ export default function SubscriptionPlansAnalyticsPage() {
                         fill="none"
                         stroke="#3b82f6"
                         strokeWidth="2"
-                        strokeDasharray={`${analytics?.utilizationStats.utilizationRate || 0}, 100`}
+                        strokeDasharray={`${getAverageUtilization()}, 100`}
                       />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                       <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {analytics?.utilizationStats.utilizationRate || 0}%
+                        {getAverageUtilization()}%
                       </span>
                     </div>
                   </div>
@@ -310,25 +312,25 @@ export default function SubscriptionPlansAnalyticsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {analytics?.utilizationStats.totalCouponsGenerated || 0}
+                      {analytics?.utilizationStats?.reduce((sum, s) => sum + s.totalBundles, 0) || 0}
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Generated</p>
                   </div>
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {analytics?.utilizationStats.totalCouponsUsed || 0}
+                      {analytics?.utilizationStats?.reduce((sum, s) => sum + s.fullyUsedBundles, 0) || 0}
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Used</p>
                   </div>
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {analytics?.utilizationStats.unusedCoupons || 0}
+                      {analytics?.utilizationStats?.reduce((sum, s) => sum + s.activeBundles, 0) || 0}
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Unused</p>
                   </div>
                   <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {analytics?.utilizationStats.utilizationRate || 0}%
+                      {getAverageUtilization()}%
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">Rate</p>
                   </div>

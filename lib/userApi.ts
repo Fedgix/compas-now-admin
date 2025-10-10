@@ -127,13 +127,13 @@ export const userApi = {
 
   // Activate user
   activateUser: async (userId: string): Promise<ApiResponse<User>> => {
-    const response = await apiService.patch<ApiResponse<User>>(`/admin/users/${userId}/activate`)
+    const response = await apiService.put<ApiResponse<User>>(`/admin/users/${userId}/activate`)
     return response
   },
 
   // Deactivate user
   deactivateUser: async (userId: string): Promise<ApiResponse<User>> => {
-    const response = await apiService.patch<ApiResponse<User>>(`/admin/users/${userId}/deactivate`)
+    const response = await apiService.put<ApiResponse<User>>(`/admin/users/${userId}/deactivate`)
     return response
   },
 
@@ -175,7 +175,7 @@ export const userApi = {
     if (filters.search) queryParams.append('search', filters.search)
     if (filters.status) queryParams.append('status', filters.status)
 
-    const response = await fetch(`${apiService.instance.defaults.baseURL}/admin/users/export?${queryParams.toString()}`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/admin/users/export?${queryParams.toString()}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
       }

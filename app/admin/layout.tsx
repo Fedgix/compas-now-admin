@@ -19,6 +19,7 @@ export default function AdminLayout({
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [admin, setAdmin] = useState<any>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   useEffect(() => {
     checkAuth()
@@ -100,7 +101,7 @@ export default function AdminLayout({
     <EnvironmentProvider>
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
         {/* Sidebar */}
-        <AdminSidebar />
+        <AdminSidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
 
         {/* Main Content */}
         <div className="pl-64">

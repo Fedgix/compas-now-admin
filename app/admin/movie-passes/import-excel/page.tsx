@@ -67,7 +67,7 @@ export default function ImportExcelPage() {
       console.log('📋 Plans response:', response)
       
       // Handle response structure - check if it has 'data' property
-      const plansData = response?.data || response
+      const plansData = (response as any)?.data || response
       
       if (plansData && Array.isArray(plansData)) {
         setAvailablePlans(plansData)

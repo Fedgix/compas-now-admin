@@ -164,7 +164,7 @@ export default function UsersPage() {
       
       if (response.status === 'success') {
         console.log('📡 User bookings loaded:', response.data.bookings)
-        toast.info(`Found ${response.data.bookings.length} bookings for this user`)
+        toast.success(`Found ${response.data.bookings.length} bookings for this user`)
         // Navigate to bookings page with user filter
         window.location.href = `/admin/bookings?userId=${userId}`
       } else {
@@ -373,7 +373,7 @@ export default function UsersPage() {
             setShowEditModal(false)
             setSelectedUser(null)
           }}
-          onSubmit={(data) => handleUpdateUser(selectedUser.id, data)}
+          onSubmit={(data) => handleUpdateUser((selectedUser as any).id || (selectedUser as any)._id, data)}
         />
       )}
 

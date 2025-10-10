@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { FiSave, FiX, FiPlus, FiTrash2 } from 'react-icons/fi'
-import { subscriptionPlanApi, type CreatePlanData } from '@/lib/subscriptionPlanApi'
+import { subscriptionPlanApi } from '@/lib/subscriptionPlanApi'
+import { type CreateSubscriptionPlanData } from '@/lib/types'
 
 interface PlanFormData {
   planId: 'SILVER' | 'GOLD'
@@ -109,36 +110,51 @@ export default function CreateSubscriptionPlanPage() {
   }
 
   const handleNestedInputChange = (parent: string, field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [parent]: {
-        ...prev[parent as keyof PlanFormData],
-        [field]: value
+    setFormData(prev => {
+      const parentField = prev[parent as keyof PlanFormData]
+      return {
+        ...prev,
+        [parent]: {
+          ...(typeof parentField === 'object' ? parentField : {}),
+          [field]: value
+        }
       }
-    }))
+    })
   }
 
   const handleArrayInputChange = (field: string, index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: prev[field as keyof PlanFormData].map((item: string, i: number) => 
-        i === index ? value : item
-      )
-    }))
+    setFormData(prev => {
+      const fieldValue = prev[field as keyof PlanFormData]
+      const arrayValue = Array.isArray(fieldValue) ? fieldValue : []
+      return {
+        ...prev,
+        [field]: arrayValue.map((item: string, i: number) => 
+          i === index ? value : item
+        )
+      }
+    })
   }
 
   const addArrayItem = (field: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: [...prev[field as keyof PlanFormData], '']
-    }))
+    setFormData(prev => {
+      const fieldValue = prev[field as keyof PlanFormData]
+      const arrayValue = Array.isArray(fieldValue) ? fieldValue : []
+      return {
+        ...prev,
+        [field]: [...arrayValue, '']
+      }
+    })
   }
 
   const removeArrayItem = (field: string, index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: prev[field as keyof PlanFormData].filter((_: string, i: number) => i !== index)
-    }))
+    setFormData(prev => {
+      const fieldValue = prev[field as keyof PlanFormData]
+      const arrayValue = Array.isArray(fieldValue) ? fieldValue : []
+      return {
+        ...prev,
+        [field]: arrayValue.filter((_: string, i: number) => i !== index)
+      }
+    })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,7 +163,7 @@ export default function CreateSubscriptionPlanPage() {
 
     try {
       // Clean up empty strings from arrays
-      const cleanedData: CreatePlanData = {
+      const cleanedData: Partial<CreateSubscriptionPlanData> = {
         ...formData,
         detailedInfo: {
           benefits: formData.detailedInfo.benefits.filter(item => item.trim() !== ''),
@@ -156,16 +172,13 @@ export default function CreateSubscriptionPlanPage() {
           restrictions: formData.detailedInfo.restrictions.filter(item => item.trim() !== '')
         },
         howToUse: formData.howToUse.filter(item => item.trim() !== ''),
-        importantNotes: formData.importantNotes.filter(item => item.trim() !== ''),
-        tags: formData.tags.filter(item => item.trim() !== '')
+        importantNotes: formData.importantNotes.filter(item => item.trim() !== '')
       }
 
-      const response = await subscriptionPlanApi.createPlan(cleanedData)
+      const response = await subscriptionPlanApi.createSubscriptionPlan(cleanedData as any)
 
-      if (response.success) {
+      if (response) {
         router.push('/admin/subscription-plans')
-      } else {
-        console.error('Error creating plan:', response.message)
       }
     } catch (error) {
       console.error('Error creating plan:', error)

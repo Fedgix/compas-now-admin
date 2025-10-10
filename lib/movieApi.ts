@@ -30,7 +30,7 @@ export class MovieApiService {
 
   // Update movie featured status
   async updateMovieFeaturedStatus(id: string, isFeatured: boolean) {
-    return apiService.patch<Movie>(`/movies/${id}/featured`, { isFeatured })
+    return apiService.put<Movie>(`/movies/${id}/featured`, { isFeatured })
   }
 
   // Delete movie
@@ -173,12 +173,12 @@ export class MovieApiService {
     try {
       const base64Data = await this.convertToBase64(file)
       
-      const response = await apiService.post('/movies/upload-image', {
+      const response = await apiService.post<{ url: string }>('/movies/upload-image', {
         imageData: base64Data,
         folder: 'compas_movies'
       })
 
-      return response.data.url
+      return (response as any).data?.url || response
     } catch (error) {
       console.error('Backend upload error:', error)
       throw error

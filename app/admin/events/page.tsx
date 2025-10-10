@@ -774,7 +774,11 @@ function CreateEventModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit(formData)
+    onSubmit({
+      ...formData,
+      totalSeats: parseInt(formData.totalSeats) || 0,
+      price: parseFloat(formData.price) || 0
+    })
   }
 
   return (
@@ -906,7 +910,11 @@ function EditEventModal({ event, onClose, onSubmit }: { event: Event, onClose: (
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit(formData)
+    onSubmit({
+      ...formData,
+      totalSeats: parseInt(formData.totalSeats) || 0,
+      price: parseFloat(formData.price) || 0
+    })
   }
 
   return (

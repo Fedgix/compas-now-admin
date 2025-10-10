@@ -55,7 +55,7 @@ export class PersonApiService {
 
   // Toggle person active status
   static async togglePersonStatus(id: string) {
-    const response = await apiService.patch(`/persons/${id}/toggle-status`)
+    const response = await apiService.put(`/persons/${id}/toggle-status`, {})
     return response
   }
 }

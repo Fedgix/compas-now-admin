@@ -10,22 +10,116 @@ interface AdminSidebarProps {
 }
 
 const menuItems = [
-  { href: '/admin', label: 'Dashboard' },
-  { href: '/admin/events', label: 'Events' },
-  { href: '/admin/movies', label: 'Movies' },
-  { href: '/admin/persons', label: 'Persons' },
-  { href: '/admin/users', label: 'Users' },
-  { href: '/admin/bookings', label: 'Bookings' },
-  { href: '/admin/payments', label: 'Payments' },
-  { href: '/admin/subscription-plans', label: 'Subscription Plans' },
-  { href: '/admin/analytics', label: 'Analytics' },
-  { href: '/admin/notifications', label: 'Notifications' },
-  { href: '/admin/reports', label: 'Reports' },
-  { href: '/admin/settings', label: 'Settings' },
+  { href: '/admin', label: 'Dashboard', icon: '📊' },
+  { href: '/admin/events', label: 'Events', icon: '🎬' },
+  { href: '/admin/movies', label: 'Movies', icon: '🎞️' },
+  { href: '/admin/persons', label: 'Persons', icon: '👤' },
+  { href: '/admin/users', label: 'Users', icon: '👥' },
+  { href: '/admin/bookings', label: 'Bookings', icon: '🎫' },
+  { href: '/admin/payments', label: 'Payments', icon: '💳' },
+  { 
+    label: 'Movie Pass System',
+    icon: '🎟️',
+    isGroup: true,
+    items: [
+      { href: '/admin/subscription-plans', label: 'Subscription Plans', icon: '🎭' },
+      { href: '/admin/movie-passes/analytics', label: 'Movie Pass Batches', icon: '📦' },
+      { href: '/admin/movie-passes/import-excel', label: 'Import Excel', icon: '📊' },
+      { 
+        label: 'Analytics',
+        icon: '📈',
+        isSubGroup: true,
+        items: [
+          { href: '/admin/movie-pass-analytics', label: 'Overview', icon: '📊' },
+          { href: '/admin/movie-pass-analytics/batches', label: 'Batch Analytics', icon: '📦' },
+          { href: '/admin/movie-pass-analytics/subscriptions', label: 'Subscriptions', icon: '💼' },
+          { href: '/admin/movie-pass-analytics/revenue', label: 'Revenue', icon: '💰' },
+          { href: '/admin/movie-pass-analytics/users', label: 'User Behavior', icon: '👥' },
+        ]
+      }
+    ]
+  },
+  { href: '/admin/notifications', label: 'Notifications', icon: '🔔' },
+  { href: '/admin/reports', label: 'Reports', icon: '📋' },
+  { href: '/admin/settings', label: 'Settings', icon: '⚙️' },
 ]
 
 export default function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
   const pathname = usePathname()
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(['Movie Pass System'])
+
+  const toggleGroup = (label: string) => {
+    setExpandedGroups(prev => 
+      prev.includes(label) 
+        ? prev.filter(g => g !== label)
+        : [...prev, label]
+    )
+  }
+
+  const renderMenuItem = (item: any, depth = 0) => {
+    if (item.isGroup || item.isSubGroup) {
+      const isExpanded = expandedGroups.includes(item.label)
+      const hasActiveChild = item.items?.some((subItem: any) => 
+        subItem.href === pathname || 
+        (subItem.items && subItem.items.some((nested: any) => nested.href === pathname))
+      )
+
+      return (
+        <div key={item.label} className={depth > 0 ? 'ml-4' : ''}>
+          <button
+            onClick={() => toggleGroup(item.label)}
+            className={`
+              w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200
+              ${hasActiveChild
+                ? 'bg-primary/10 text-primary border border-primary/20'
+                : 'text-white/80 hover:text-primary hover:bg-white/5'
+              }
+            `}
+          >
+            <div className="flex items-center space-x-3">
+              <span className="w-5 h-5 text-center">{item.icon}</span>
+              <span className="font-medium">{item.label}</span>
+            </div>
+            <span className={`transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}>
+              ▶
+            </span>
+          </button>
+          
+          {isExpanded && (
+            <div className="mt-1 space-y-1">
+              {item.items?.map((subItem: any) => renderMenuItem(subItem, depth + 1))}
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    const isActive = pathname === item.href
+    
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        className={`
+          flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
+          ${depth > 0 ? 'ml-4' : ''}
+          ${isActive 
+            ? 'bg-primary/20 text-primary border border-primary/30' 
+            : 'text-white/80 hover:text-primary hover:bg-white/5'
+          }
+        `}
+        onClick={() => {
+          // Close sidebar on mobile when navigating
+          if (window.innerWidth < 1024) {
+            onToggle()
+          }
+        }}
+      >
+        <span className="w-5 h-5 text-center">{item.icon}</span>
+        <span className="font-medium">{item.label}</span>
+      </Link>
+    )
+  }
 
   return (
     <>
@@ -70,46 +164,8 @@ export default function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2">
-            {menuItems.map((item) => {
-              const isActive = pathname === item.href
-              
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`
-                    flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200
-                    ${isActive 
-                      ? 'bg-primary/20 text-primary border border-primary/30' 
-                      : 'text-white/80 hover:text-primary hover:bg-white/5'
-                    }
-                  `}
-                  onClick={() => {
-                    // Close sidebar on mobile when navigating
-                    if (window.innerWidth < 1024) {
-                      onToggle()
-                    }
-                  }}
-                >
-                  <span className="w-5 h-5 text-center">
-                    {item.label === 'Dashboard' && '📊'}
-                    {item.label === 'Events' && '🎬'}
-                    {item.label === 'Movies' && '🎞️'}
-                    {item.label === 'Persons' && '👤'}
-                    {item.label === 'Users' && '👥'}
-                    {item.label === 'Bookings' && '🎫'}
-                    {item.label === 'Payments' && '💳'}
-                    {item.label === 'Subscription Plans' && '🎭'}
-                    {item.label === 'Analytics' && '📈'}
-                    {item.label === 'Notifications' && '🔔'}
-                    {item.label === 'Reports' && '📋'}
-                    {item.label === 'Settings' && '⚙️'}
-                  </span>
-                  <span className="font-medium">{item.label}</span>
-                </Link>
-              )
-            })}
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+            {menuItems.map((item) => renderMenuItem(item))}
           </nav>
 
           {/* Footer */}

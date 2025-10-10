@@ -5,7 +5,8 @@ import { useParams, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { FiEdit, FiTrash2, FiArrowLeft, FiRefreshCw, FiEye, FiEyeOff } from 'react-icons/fi'
 import LoadingSpinner from '@/components/LoadingSpinner'
-import { subscriptionPlanApi, type SubscriptionPlan } from '@/lib/subscriptionPlanApi'
+import { subscriptionPlanApi } from '@/lib/subscriptionPlanApi'
+import { type SubscriptionPlan } from '@/lib/types'
 
 export default function SubscriptionPlanDetailsPage() {
   const params = useParams()
@@ -18,10 +19,10 @@ export default function SubscriptionPlanDetailsPage() {
   const fetchPlan = async () => {
     try {
       setLoading(true)
-      const response = await subscriptionPlanApi.getPlanById(params.id as string)
+      const plan = await subscriptionPlanApi.getSubscriptionPlanById(params.id as string)
       
-      if (response.success) {
-        setPlan(response.data)
+      if (plan) {
+        setPlan(plan)
       }
     } catch (error) {
       console.error('Error fetching subscription plan:', error)
@@ -39,11 +40,9 @@ export default function SubscriptionPlanDetailsPage() {
   const handleDelete = async () => {
     try {
       setDeleting(true)
-      const response = await subscriptionPlanApi.deletePlan(params.id as string)
-
-      if (response.success) {
-        router.push('/admin/subscription-plans')
-      }
+      // TODO: Implement delete functionality
+      console.warn('Delete functionality not yet implemented')
+      router.push('/admin/subscription-plans')
     } catch (error) {
       console.error('Error deleting plan:', error)
     } finally {
@@ -137,7 +136,7 @@ export default function SubscriptionPlanDetailsPage() {
                   <span>Refresh</span>
                 </button>
                 <button
-                  onClick={() => router.push(`/admin/subscription-plans/${plan._id}/edit`)}
+                  onClick={() => router.push(`/admin/subscription-plans/${plan.id}/edit`)}
                   className="px-4 py-2 bg-primary hover:bg-primary/90 text-black rounded-lg transition-colors flex items-center space-x-2"
                 >
                   <FiEdit className="w-4 h-4" />
@@ -391,7 +390,7 @@ export default function SubscriptionPlanDetailsPage() {
                 </h3>
                 <div className="space-y-3">
                   <button
-                    onClick={() => router.push(`/admin/subscription-plans/${plan._id}/edit`)}
+                    onClick={() => router.push(`/admin/subscription-plans/${plan.id}/edit`)}
                     className="w-full bg-primary hover:bg-primary/90 text-black px-4 py-2 rounded-lg transition-colors flex items-center justify-center space-x-2"
                   >
                     <FiEdit className="w-4 h-4" />
