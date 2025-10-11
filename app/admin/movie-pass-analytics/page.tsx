@@ -54,7 +54,6 @@ export default function MoviePassAnalyticsOverview() {
       ])
 
     } catch (error) {
-      console.error('Error loading analytics:', error)
       toast.error('Failed to load analytics')
     } finally {
       setLoading(false)

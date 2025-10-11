@@ -97,9 +97,10 @@ class MoviePassAnalyticsApi {
       const totalPasses = batches.reduce((sum, batch) => sum + (batch.totalMoviePasses || 0), 0)
       const usedPasses = batches.reduce((sum, batch) => sum + (batch.usedMoviePasses || 0), 0)
       const availablePasses = batches.reduce((sum, batch) => sum + (batch.availableMoviePasses || 0), 0)
+      const batchRevenue = batches.reduce((sum, batch) => sum + (batch.totalRevenue || 0), 0)
       
-      // Get revenue from subscription analytics
-      let totalRevenue = 0
+      // Get revenue from subscription analytics (fallback to batch revenue)
+      let totalRevenue = batchRevenue
       if (bundleStatsResponse && bundleStatsResponse.totalRevenue) {
         totalRevenue = bundleStatsResponse.totalRevenue
       }
@@ -113,7 +114,6 @@ class MoviePassAnalyticsApi {
         growth: 12 // TODO: Calculate from historical data
       }
     } catch (error) {
-      console.error('Error fetching overview metrics:', error)
       // Return default values on error
       return {
         totalPasses: 0,

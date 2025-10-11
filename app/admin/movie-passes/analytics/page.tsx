@@ -72,45 +72,29 @@ export default function MoviePassAnalyticsPage() {
       setLoading(true)
       setError(null)
       
-      console.log('🔄 Loading analytics data...')
-      
       // Load subscription plans
-      console.log('📋 Loading subscription plans...')
       const plansResponse: any = await subscriptionPlanApi.getAllSubscriptionPlans()
-      console.log('📋 Plans response:', plansResponse)
       
       // Handle both array response and {success, data} response
       if (Array.isArray(plansResponse)) {
         setSubscriptionPlans(plansResponse)
-        console.log('✅ Plans loaded (array):', plansResponse)
       } else if (plansResponse && plansResponse.data && Array.isArray(plansResponse.data)) {
         setSubscriptionPlans(plansResponse.data)
-        console.log('✅ Plans loaded (object):', plansResponse.data)
-      } else {
-        console.error('❌ Plans failed or invalid format:', plansResponse)
       }
       
       // Load batches
-      console.log('📦 Loading batches...')
       const batchesResponse: any = await moviePassAnalyticsApi.getAllBatches()
-      console.log('📦 Batches response:', batchesResponse)
       
       // Handle both array response and {status: 'success', data} response
       if (Array.isArray(batchesResponse)) {
         setBatches(batchesResponse)
-        console.log('✅ Batches loaded (array):', batchesResponse)
       } else if (batchesResponse && batchesResponse.status === 'success' && batchesResponse.data) {
         setBatches(batchesResponse.data)
-        console.log('✅ Batches loaded (object):', batchesResponse.data)
       } else if (batchesResponse && batchesResponse.data && Array.isArray(batchesResponse.data)) {
         setBatches(batchesResponse.data)
-        console.log('✅ Batches loaded (object with data):', batchesResponse.data)
-      } else {
-        console.error('❌ Batches failed or invalid format:', batchesResponse)
       }
       
     } catch (err) {
-      console.error('❌ Error loading data:', err)
       setError(err instanceof Error ? err.message : 'Failed to load data')
     } finally {
       setLoading(false)

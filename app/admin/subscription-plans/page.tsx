@@ -94,14 +94,12 @@ export default function SubscriptionPlansPage() {
     try {
       setLoading(true)
       const response = await subscriptionPlanApi.getAllSubscriptionPlans()
-      console.log('API Response:', response)
       
       // API returns {success: true, data: Array, pagination: {...}}
       const plansData = (response as any)?.data && Array.isArray((response as any).data) ? (response as any).data : []
       setPlans(plansData)
       setError(null)
     } catch (err) {
-      console.error('Error loading plans:', err)
       setError(err instanceof Error ? err.message : 'Failed to load subscription plans')
       setPlans([]) // Set empty array on error
     } finally {
@@ -175,7 +173,6 @@ export default function SubscriptionPlansPage() {
       setSuccess('Plan marked as sold out successfully')
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
-      console.error('Error marking plan as sold out:', err)
       setError(err instanceof Error ? err.message : 'Failed to mark plan as sold out')
     }
   }
@@ -191,7 +188,6 @@ export default function SubscriptionPlansPage() {
       setSuccess('Plan reactivated successfully')
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
-      console.error('Error reactivating plan:', err)
       setError(err instanceof Error ? err.message : 'Failed to reactivate plan')
     }
   }
