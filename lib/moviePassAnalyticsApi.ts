@@ -97,12 +97,21 @@ class MoviePassAnalyticsApi {
       const totalPasses = batches.reduce((sum, batch) => sum + (batch.totalMoviePasses || 0), 0)
       const usedPasses = batches.reduce((sum, batch) => sum + (batch.usedMoviePasses || 0), 0)
       const availablePasses = batches.reduce((sum, batch) => sum + (batch.availableMoviePasses || 0), 0)
-      const batchRevenue = batches.reduce((sum, batch) => sum + (batch.totalRevenue || 0), 0)
+      const batchRevenue = batches.reduce((sum, batch) => sum + (batch.totalRevenue || batch.batchAnalytics?.totalRevenue || 0), 0)
       
       // Get revenue from subscription analytics (fallback to batch revenue)
       let totalRevenue = batchRevenue
-      if (bundleStatsResponse && bundleStatsResponse.totalRevenue) {
-        totalRevenue = bundleStatsResponse.totalRevenue
+      
+      // Handle multiple response formats for bundle stats
+      if (bundleStatsResponse) {
+        if (bundleStatsResponse.totalRevenue) {
+          totalRevenue = bundleStatsResponse.totalRevenue
+        } else if (bundleStatsResponse.data && bundleStatsResponse.data.totalRevenue) {
+          totalRevenue = bundleStatsResponse.data.totalRevenue
+        } else if (bundleStatsResponse[0] && bundleStatsResponse[0].totalRevenue) {
+          // If it returns an array, sum all revenues
+          totalRevenue = bundleStatsResponse.reduce((sum: number, stat: any) => sum + (stat.totalRevenue || 0), 0)
+        }
       }
       
       return {
