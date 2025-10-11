@@ -23,7 +23,9 @@ export default function MoviesPage() {
       if (filterActive !== undefined) params.isActive = filterActive
       
       const response = await movieApiService.getAllMovies(params)
-      setMovies(response.movies || [])
+      // Backend returns data array, not movies array
+      const moviesData = (response as any).data || response.movies || []
+      setMovies(moviesData)
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to fetch movies')
     } finally {
