@@ -87,10 +87,10 @@ class MoviePassAnalyticsApi {
       let batches: any[] = []
       if (Array.isArray(batchesResponse)) {
         batches = batchesResponse
-      } else if (batchesResponse && batchesResponse.status === 'success' && batchesResponse.data) {
-        batches = batchesResponse.data
-      } else if (batchesResponse && batchesResponse.data && Array.isArray(batchesResponse.data)) {
-        batches = batchesResponse.data
+      } else if (batchesResponse && (batchesResponse as any).status === 'success' && (batchesResponse as any).data) {
+        batches = (batchesResponse as any).data
+      } else if (batchesResponse && (batchesResponse as any).data && Array.isArray((batchesResponse as any).data)) {
+        batches = (batchesResponse as any).data
       }
       
       // Calculate totals from batches
@@ -104,13 +104,13 @@ class MoviePassAnalyticsApi {
       
       // Handle multiple response formats for bundle stats
       if (bundleStatsResponse) {
-        if (bundleStatsResponse.totalRevenue) {
-          totalRevenue = bundleStatsResponse.totalRevenue
-        } else if (bundleStatsResponse.data && bundleStatsResponse.data.totalRevenue) {
-          totalRevenue = bundleStatsResponse.data.totalRevenue
-        } else if (bundleStatsResponse[0] && bundleStatsResponse[0].totalRevenue) {
+        if ((bundleStatsResponse as any).totalRevenue) {
+          totalRevenue = (bundleStatsResponse as any).totalRevenue
+        } else if ((bundleStatsResponse as any).data && (bundleStatsResponse as any).data.totalRevenue) {
+          totalRevenue = (bundleStatsResponse as any).data.totalRevenue
+        } else if ((bundleStatsResponse as any)[0] && (bundleStatsResponse as any)[0].totalRevenue) {
           // If it returns an array, sum all revenues
-          totalRevenue = bundleStatsResponse.reduce((sum: number, stat: any) => sum + (stat.totalRevenue || 0), 0)
+          totalRevenue = (bundleStatsResponse as any).reduce((sum: number, stat: any) => sum + (stat.totalRevenue || 0), 0)
         }
       }
       

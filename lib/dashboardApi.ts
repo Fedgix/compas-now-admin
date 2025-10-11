@@ -50,12 +50,10 @@ class DashboardApiService {
   // Get dashboard statistics
   async getDashboardStats(): Promise<DashboardStats> {
     try {
-      console.log('🔧 getDashboardStats: Starting...')
       
       // Call real backend API
       const response = await apiService.get('/admin/dashboard/stats') as any
       
-      console.log('📡 getDashboardStats: Response received:', response)
       
       if (response.status === 'success' && response.data) {
         const data = response.data
@@ -83,14 +81,11 @@ class DashboardApiService {
           }))
         }
         
-        console.log('✅ getDashboardStats: Returning real data')
         return mappedStats
       }
       
       throw new Error('Invalid response format')
     } catch (error: any) {
-      console.error('❌ getDashboardStats error:', error)
-      console.log('🔧 getDashboardStats: Using mock data as fallback...')
       
       // Mock data as fallback
       const mockStats: DashboardStats = {
@@ -144,7 +139,6 @@ class DashboardApiService {
             })
           })
         } catch (error) {
-          console.warn(`Could not fetch bookings for event ${event.id}:`, error)
         }
       }
       
@@ -153,7 +147,6 @@ class DashboardApiService {
         .sort((a, b) => new Date(b.bookingDate).getTime() - new Date(a.bookingDate).getTime())
         .slice(0, 10)
     } catch (error) {
-      console.error('Error fetching recent bookings:', error)
       return []
     }
   }
@@ -178,7 +171,6 @@ class DashboardApiService {
           const statsResponse = await apiService.get(`/admin/events/${event.id}/basic-stats`) as any
           totalBookings += statsResponse.data?.totalBookings || 0
         } catch (error) {
-          console.warn(`Could not fetch stats for event ${event.id}:`, error)
         }
       }
       
@@ -191,7 +183,6 @@ class DashboardApiService {
         totalRevenue: earnings.totalEarnings || 0
       }
     } catch (error) {
-      console.error('Error fetching event stats:', error)
       throw error
     }
   }
@@ -211,7 +202,6 @@ class DashboardApiService {
         }
       }
     } catch (error) {
-      console.error(`Error fetching basic stats for event ${eventId}:`, error)
       throw error
     }
   }
@@ -239,7 +229,6 @@ class DashboardApiService {
         currency: '₹'
       }
     } catch (error) {
-      console.error('Error fetching total earnings:', error)
       throw error
     }
   }

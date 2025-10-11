@@ -8,7 +8,6 @@ export default function SimpleLogin() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('🚀 SIMPLE FORM SUBMITTED!', { email, password: '***' })
     alert(`Login attempt: ${email}`)
   }
 
@@ -38,7 +37,6 @@ export default function SimpleLogin() {
           
           <button
             type="submit"
-            onClick={() => console.log('🖱️ Button clicked!')}
             className="w-full bg-green-500 text-white p-3 rounded"
           >
             Test Login

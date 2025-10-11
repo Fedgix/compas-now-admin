@@ -62,7 +62,6 @@ export default function PaymentsPage() {
   const fetchPayments = async () => {
     try {
       setIsLoading(true)
-      console.log('🔧 Fetching payments from:', currentConfig.baseUrl)
       
       // Mock data for demonstration
       const mockPayments: Payment[] = [
@@ -139,10 +138,8 @@ export default function PaymentsPage() {
       ]
       
       setPayments(mockPayments)
-      console.log('📡 Payments loaded:', mockPayments.length)
       
     } catch (error: any) {
-      console.error('❌ Error fetching payments:', error)
       setError(error.response?.data?.message || error.message || 'Failed to fetch payments')
     } finally {
       setIsLoading(false)
@@ -152,7 +149,6 @@ export default function PaymentsPage() {
   // Fetch payment statistics
   const fetchPaymentStats = async () => {
     try {
-      console.log('🔧 Fetching payment stats...')
       
       // Mock stats for demonstration
       const mockStats: PaymentStats = {
@@ -181,17 +177,14 @@ export default function PaymentsPage() {
       }
       
       setStats(mockStats)
-      console.log('📡 Payment stats loaded:', mockStats)
       
     } catch (error: any) {
-      console.error('❌ Error fetching payment stats:', error)
     }
   }
 
   // Process refund
   const handleProcessRefund = async (paymentId: string, refundAmount: number, reason: string) => {
     try {
-      console.log('🔧 Processing refund:', paymentId, refundAmount, reason)
       
       // Note: This endpoint might not exist in backend
       // const response = await apiService.post(`/admin/payments/${paymentId}/refund`, { 
@@ -205,7 +198,6 @@ export default function PaymentsPage() {
       fetchPayments()
       
     } catch (error: any) {
-      console.error('❌ Error processing refund:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to process refund')
     }
   }
@@ -213,7 +205,6 @@ export default function PaymentsPage() {
   // Get payment details
   const handleGetPaymentDetails = async (paymentId: string) => {
     try {
-      console.log('🔧 Getting payment details for:', paymentId)
       
       const payment = payments.find(p => p.id === paymentId)
       if (payment) {
@@ -222,7 +213,6 @@ export default function PaymentsPage() {
       }
       
     } catch (error: any) {
-      console.error('❌ Error getting payment details:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to get payment details')
     }
   }
@@ -230,7 +220,6 @@ export default function PaymentsPage() {
   // Export payments
   const handleExportPayments = async () => {
     try {
-      console.log('🔧 Exporting payments...')
       
       // Create CSV content
       const csvContent = [
@@ -261,7 +250,6 @@ export default function PaymentsPage() {
       toast.success('Payments exported successfully!')
       
     } catch (error: any) {
-      console.error('❌ Error exporting payments:', error)
       toast.error('Failed to export payments')
     }
   }
@@ -269,7 +257,6 @@ export default function PaymentsPage() {
   // Retry failed payment
   const handleRetryPayment = async (paymentId: string) => {
     try {
-      console.log('🔧 Retrying payment:', paymentId)
       
       // Note: This endpoint might not exist in backend
       // const response = await apiService.post(`/admin/payments/${paymentId}/retry`) as any
@@ -278,7 +265,6 @@ export default function PaymentsPage() {
       fetchPayments()
       
     } catch (error: any) {
-      console.error('❌ Error retrying payment:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to retry payment')
     }
   }

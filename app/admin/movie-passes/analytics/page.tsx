@@ -155,7 +155,7 @@ export default function MoviePassAnalyticsPage() {
           <div className="space-y-3">
             {subscriptionPlans.length > 0 ? (
               subscriptionPlans.map((plan, index) => (
-                <div key={plan._id || plan.id || `plan-${index}`} className="p-3 bg-gray-700 rounded-lg">
+                <div key={(plan as any)._id || (plan as any).id || `plan-${index}`} className="p-3 bg-gray-700 rounded-lg">
                   <h3 className="font-medium text-white">{plan.displayName || plan.name}</h3>
                   <p className="text-sm text-gray-400">{plan.planType} - ₹{plan.price}</p>
                   <span className={`inline-block mt-1 px-2 py-1 rounded-full text-xs font-medium ${plan.isActive ? 'text-green-400 bg-green-400/10' : 'text-red-400 bg-red-400/10'}`}>
@@ -178,7 +178,7 @@ export default function MoviePassAnalyticsPage() {
           <div className="space-y-3">
             {batches.length > 0 ? (
               batches.slice(0, 5).map((batch, index) => (
-                <div key={batch._id || batch.id || `batch-${index}`} className="p-3 bg-gray-700 rounded-lg">
+                <div key={(batch as any)._id || (batch as any).id || `batch-${index}`} className="p-3 bg-gray-700 rounded-lg">
                   <h3 className="font-medium text-white">{batch.batchName}</h3>
                   <p className="text-sm text-gray-400">{batch.planType} - {batch.planId}</p>
                   <div className="mt-2 grid grid-cols-3 gap-2 text-sm">

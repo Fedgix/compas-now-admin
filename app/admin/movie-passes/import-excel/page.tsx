@@ -62,33 +62,24 @@ export default function ImportExcelPage() {
   const loadAvailablePlans = async () => {
     setLoadingPlans(true)
     try {
-      console.log('🔄 Loading subscription plans...')
       const response = await subscriptionPlanApi.getAllSubscriptionPlans()
-      console.log('📋 Plans response:', response)
       
       // Handle response structure - check if it has 'data' property
       const plansData = (response as any)?.data || response
       
       if (plansData && Array.isArray(plansData)) {
         setAvailablePlans(plansData)
-        console.log('✅ Plans loaded:', plansData)
-        console.log('📋 First plan structure:', plansData[0])
         
         // Set default plan if available
         if (plansData.length > 0) {
           const defaultPlan = plansData.find(plan => (plan.planId || plan.name) === 'SILVER') || plansData[0]
-          console.log('🎯 Default plan selected:', defaultPlan)
-          console.log('🔍 Default plan ID:', defaultPlan._id || defaultPlan.id)
-          console.log('🔍 Default plan type:', defaultPlan.planId || defaultPlan.name)
           setPlanId(defaultPlan._id || defaultPlan.id)
           setPlanType(defaultPlan.planId || defaultPlan.name)
         }
       } else {
-        console.error('❌ No plans data in response:', response)
         setError('No subscription plans found')
       }
     } catch (error) {
-      console.error('❌ Error loading plans:', error)
       setError('Failed to load subscription plans: ' + (error instanceof Error ? error.message : 'Unknown error'))
     } finally {
       setLoadingPlans(false)
@@ -155,7 +146,6 @@ export default function ImportExcelPage() {
       }
 
     } catch (err) {
-      console.error('Upload error:', err)
       setError(err instanceof Error ? err.message : 'Failed to upload file')
     } finally {
       setUploading(false)
@@ -318,16 +308,11 @@ export default function ImportExcelPage() {
                 <select
                   value={planId}
                   onChange={(e) => {
-                    console.log('🔄 Plan selection changed:', e.target.value)
-                    console.log('📋 Available plans:', availablePlans)
                     const selectedPlan = availablePlans.find(plan => (plan._id || plan.id) === e.target.value)
-                    console.log('🎯 Selected plan:', selectedPlan)
                     if (selectedPlan) {
                       setPlanId(selectedPlan._id || selectedPlan.id)
                       setPlanType(selectedPlan.planId || selectedPlan.name)
-                      console.log('✅ Plan updated - ID:', selectedPlan._id || selectedPlan.id, 'Type:', selectedPlan.planId || selectedPlan.name)
                     } else {
-                      console.error('❌ Plan not found for ID:', e.target.value)
                     }
                   }}
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"

@@ -27,7 +27,6 @@ export default function UsersPage() {
   const fetchUsers = async () => {
     try {
       setIsLoading(true)
-      console.log('🔧 Fetching users from:', currentConfig.baseUrl)
       
       const response = await userApi.getAllUsers({
         page: 1,
@@ -40,13 +39,11 @@ export default function UsersPage() {
       
       if (response.status === 'success') {
         setUsers(response.data.users)
-        console.log('📡 Users loaded:', response.data.users.length)
       } else {
         setError(response.message || 'Failed to fetch users')
       }
       
     } catch (error: any) {
-      console.error('❌ Error fetching users:', error)
       setError(error.response?.data?.message || error.message || 'Failed to fetch users')
     } finally {
       setIsLoading(false)
@@ -56,24 +53,20 @@ export default function UsersPage() {
   // Fetch user statistics
   const fetchUserStats = async () => {
     try {
-      console.log('🔧 Fetching user stats...')
       
       const response = await userApi.getUserStatistics()
       
       if (response.status === 'success') {
         setStats(response.data)
-        console.log('📡 User stats loaded:', response.data)
       }
       
     } catch (error: any) {
-      console.error('❌ Error fetching user stats:', error)
     }
   }
 
   // Create new user
   const handleCreateUser = async (userData: CreateUserData) => {
     try {
-      console.log('🔧 Creating user:', userData)
       
       const response = await userApi.createUser(userData)
       
@@ -86,7 +79,6 @@ export default function UsersPage() {
       }
       
     } catch (error: any) {
-      console.error('❌ Error creating user:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to create user')
     }
   }
@@ -94,7 +86,6 @@ export default function UsersPage() {
   // Update user
   const handleUpdateUser = async (userId: string, userData: UpdateUserData) => {
     try {
-      console.log('🔧 Updating user:', userId, userData)
       
       const response = await userApi.updateUser(userId, userData)
       
@@ -108,7 +99,6 @@ export default function UsersPage() {
       }
       
     } catch (error: any) {
-      console.error('❌ Error updating user:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to update user')
     }
   }
@@ -118,7 +108,6 @@ export default function UsersPage() {
     if (!confirm('Are you sure you want to deactivate this user?')) return
     
     try {
-      console.log('🔧 Deactivating user:', userId)
       
       const response = await userApi.deactivateUser(userId)
       
@@ -130,7 +119,6 @@ export default function UsersPage() {
       }
       
     } catch (error: any) {
-      console.error('❌ Error deactivating user:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to deactivate user')
     }
   }
@@ -138,7 +126,6 @@ export default function UsersPage() {
   // Get user details
   const handleGetUserDetails = async (userId: string) => {
     try {
-      console.log('🔧 Getting user details for:', userId)
       
       const response = await userApi.getUserById(userId)
       
@@ -150,7 +137,6 @@ export default function UsersPage() {
       }
       
     } catch (error: any) {
-      console.error('❌ Error getting user details:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to get user details')
     }
   }
@@ -158,12 +144,10 @@ export default function UsersPage() {
   // Get user bookings
   const handleGetUserBookings = async (userId: string) => {
     try {
-      console.log('🔧 Getting user bookings for:', userId)
       
       const response = await userApi.getUserBookings(userId)
       
       if (response.status === 'success') {
-        console.log('📡 User bookings loaded:', response.data.bookings)
         toast.success(`Found ${response.data.bookings.length} bookings for this user`)
         // Navigate to bookings page with user filter
         window.location.href = `/admin/bookings?userId=${userId}`
@@ -172,7 +156,6 @@ export default function UsersPage() {
       }
       
     } catch (error: any) {
-      console.error('❌ Error getting user bookings:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to get user bookings')
     }
   }

@@ -25,11 +25,9 @@ class ApiService {
           config.headers.Authorization = `Bearer ${token}`
         }
         
-        console.log(`🌐 API Request to ${envConfig.name}:`, config.url)
         return config
       },
       (error) => {
-        console.error('❌ API Request Error:', error)
         return Promise.reject(error)
       }
     )
@@ -37,11 +35,9 @@ class ApiService {
     // Response interceptor
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => {
-        console.log(`✅ API Response from ${getCurrentConfig().name}:`, response.status)
         return response
       },
       (error) => {
-        console.error('❌ API Response Error:', error.response?.status, error.message)
         return Promise.reject(error)
       }
     )
@@ -51,35 +47,17 @@ class ApiService {
   updateEnvironment(env: Environment) {
     const envConfig = getCurrentConfig()
     this.instance.defaults.baseURL = envConfig.baseUrl
-    console.log(`🔄 Switched to ${envConfig.name}: ${envConfig.baseUrl}`)
   }
 
   // Generic API methods
   async get<T>(url: string, params?: any): Promise<T> {
-    console.log('🔧 ApiService.get called with:', { url, params })
-    try {
-      const response = await this.instance.get(url, { params })
-      console.log('🔧 ApiService.get response:', response)
-      return response.data
-    } catch (error) {
-      console.error('🔧 ApiService.get error:', error)
-      throw error
-    }
+    const response = await this.instance.get(url, { params })
+    return response.data
   }
 
   async post<T>(url: string, data?: any): Promise<T> {
-    console.log('🔧 ApiService.post called with:', { url, data: data ? '***' : 'no data' })
-    console.log('🔧 Instance baseURL:', this.instance.defaults.baseURL)
-    console.log('🔧 Instance config:', this.instance.defaults)
-    
-    try {
-      const response = await this.instance.post(url, data)
-      console.log('🔧 ApiService.post response:', response)
-      return response.data
-    } catch (error) {
-      console.error('🔧 ApiService.post error:', error)
-      throw error
-    }
+    const response = await this.instance.post(url, data)
+    return response.data
   }
 
   async put<T>(url: string, data?: any): Promise<T> {

@@ -59,7 +59,6 @@ export default function EventsPage() {
   const fetchEvents = async () => {
     try {
       setIsLoading(true)
-      console.log('🔧 Fetching events from:', currentConfig.baseUrl)
       
       // Mock data for demonstration
       const mockEvents: Event[] = [
@@ -120,11 +119,9 @@ export default function EventsPage() {
       ]
       
       setEvents(mockEvents)
-      console.log('📡 Events loaded:', mockEvents.length)
       
       // Note: Uncomment below for real API call
       // const response = await apiService.get('/admin/events') as any
-      // console.log('📡 Events response:', response)
       // if (response.status === 'success') {
       //   setEvents(response.data?.events || [])
       // } else {
@@ -132,7 +129,6 @@ export default function EventsPage() {
       // }
       
     } catch (error: any) {
-      console.error('❌ Error fetching events:', error)
       setError(error.response?.data?.message || error.message || 'Failed to fetch events')
     } finally {
       setIsLoading(false)
@@ -142,10 +138,8 @@ export default function EventsPage() {
   // Fetch event statistics
   const fetchEventStats = async () => {
     try {
-      console.log('🔧 Fetching event stats...')
       
       const response = await apiService.get('/admin/events/earnings') as any
-      console.log('📡 Event stats response:', response)
       
       if (response.status === 'success') {
         const earnings = response.data || {}
@@ -159,17 +153,14 @@ export default function EventsPage() {
         })
       }
     } catch (error: any) {
-      console.error('❌ Error fetching event stats:', error)
     }
   }
 
   // Create new event
   const handleCreateEvent = async (eventData: Partial<Event>) => {
     try {
-      console.log('🔧 Creating event:', eventData)
       
       const response = await apiService.post('/admin/events', eventData) as any
-      console.log('📡 Create event response:', response)
       
       if (response.status === 'success') {
         toast.success('Event created successfully!')
@@ -179,7 +170,6 @@ export default function EventsPage() {
         toast.error(response.message || 'Failed to create event')
       }
     } catch (error: any) {
-      console.error('❌ Error creating event:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to create event')
     }
   }
@@ -187,10 +177,8 @@ export default function EventsPage() {
   // Update event
   const handleUpdateEvent = async (eventId: string, eventData: Partial<Event>) => {
     try {
-      console.log('🔧 Updating event:', eventId, eventData)
       
       const response = await apiService.put(`/admin/events/${eventId}`, eventData) as any
-      console.log('📡 Update event response:', response)
       
       if (response.status === 'success') {
         toast.success('Event updated successfully!')
@@ -201,7 +189,6 @@ export default function EventsPage() {
         toast.error(response.message || 'Failed to update event')
       }
     } catch (error: any) {
-      console.error('❌ Error updating event:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to update event')
     }
   }
@@ -211,10 +198,8 @@ export default function EventsPage() {
     if (!confirm('Are you sure you want to delete this event?')) return
     
     try {
-      console.log('🔧 Deleting event:', eventId)
       
       const response = await apiService.delete(`/admin/events/${eventId}`) as any
-      console.log('📡 Delete event response:', response)
       
       if (response.status === 'success') {
         toast.success('Event deleted successfully!')
@@ -223,7 +208,6 @@ export default function EventsPage() {
         toast.error(response.message || 'Failed to delete event')
       }
     } catch (error: any) {
-      console.error('❌ Error deleting event:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to delete event')
     }
   }
@@ -231,10 +215,8 @@ export default function EventsPage() {
   // Get event statistics
   const handleGetEventStats = async (eventId: string) => {
     try {
-      console.log('🔧 Getting event stats for:', eventId)
       
       const response = await apiService.get(`/admin/events/${eventId}/statistics`) as any
-      console.log('📡 Event statistics response:', response)
       
       if (response.status === 'success') {
         setSelectedEvent(events.find(e => e.id === eventId) || null)
@@ -243,7 +225,6 @@ export default function EventsPage() {
         toast.error(response.message || 'Failed to get event statistics')
       }
     } catch (error: any) {
-      console.error('❌ Error getting event stats:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to get event statistics')
     }
   }
@@ -251,10 +232,8 @@ export default function EventsPage() {
   // Get event bookings
   const handleGetEventBookings = async (eventId: string) => {
     try {
-      console.log('🔧 Getting event bookings for:', eventId)
       
       const response = await apiService.get(`/admin/events/${eventId}/bookings`) as any
-      console.log('📡 Event bookings response:', response)
       
       if (response.status === 'success') {
         // Navigate to bookings page with event filter
@@ -263,7 +242,6 @@ export default function EventsPage() {
         toast.error(response.message || 'Failed to get event bookings')
       }
     } catch (error: any) {
-      console.error('❌ Error getting event bookings:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to get event bookings')
     }
   }
@@ -271,10 +249,8 @@ export default function EventsPage() {
   // Get event profit
   const handleGetEventProfit = async (eventId: string) => {
     try {
-      console.log('🔧 Getting event profit for:', eventId)
       
       const response = await apiService.get(`/admin/events/${eventId}/profit`) as any
-      console.log('📡 Event profit response:', response)
       
       if (response.status === 'success') {
         toast.success(`Event Profit: ₹${response.data?.profit || 0}`)
@@ -282,7 +258,6 @@ export default function EventsPage() {
         toast.error(response.message || 'Failed to get event profit')
       }
     } catch (error: any) {
-      console.error('❌ Error getting event profit:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to get event profit')
     }
   }
@@ -290,10 +265,8 @@ export default function EventsPage() {
   // Get exclusive seats for event
   const handleGetExclusiveSeats = async (eventId: string) => {
     try {
-      console.log('🔧 Getting exclusive seats for:', eventId)
       
       const response = await apiService.get(`/admin/events/${eventId}/exclusive-seats`) as any
-      console.log('📡 Exclusive seats response:', response)
       
       if (response.status === 'success') {
         setSelectedEvent(events.find(e => e.id === eventId) || null)
@@ -302,7 +275,6 @@ export default function EventsPage() {
         toast.error(response.message || 'Failed to get exclusive seats')
       }
     } catch (error: any) {
-      console.error('❌ Error getting exclusive seats:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to get exclusive seats')
     }
   }
@@ -310,7 +282,6 @@ export default function EventsPage() {
   // Get detailed event analysis
   const handleGetEventAnalysis = async (eventId: string) => {
     try {
-      console.log('🔧 Getting event analysis for:', eventId)
       
       // Mock analysis data
       const mockAnalysisData = {
@@ -358,7 +329,6 @@ export default function EventsPage() {
       setShowEventAnalysisModal(true)
       
     } catch (error: any) {
-      console.error('❌ Error getting event analysis:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to get event analysis')
     }
   }
@@ -366,7 +336,6 @@ export default function EventsPage() {
   // Get event bookings details
   const handleGetEventBookingsDetails = async (eventId: string) => {
     try {
-      console.log('🔧 Getting event bookings details for:', eventId)
       
       // Mock bookings data
       const mockBookingsData = [
@@ -410,7 +379,6 @@ export default function EventsPage() {
       setShowEventBookingsModal(true)
       
     } catch (error: any) {
-      console.error('❌ Error getting event bookings details:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to get event bookings details')
     }
   }
@@ -418,7 +386,6 @@ export default function EventsPage() {
   // Get event payments details
   const handleGetEventPaymentsDetails = async (eventId: string) => {
     try {
-      console.log('🔧 Getting event payments details for:', eventId)
       
       // Mock payments data
       const mockPaymentsData = [
@@ -463,7 +430,6 @@ export default function EventsPage() {
       setShowEventPaymentsModal(true)
       
     } catch (error: any) {
-      console.error('❌ Error getting event payments details:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to get event payments details')
     }
   }

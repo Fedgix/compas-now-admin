@@ -25,7 +25,6 @@ export default function SubscriptionPlanDetailsPage() {
         setPlan(plan)
       }
     } catch (error) {
-      console.error('Error fetching subscription plan:', error)
     } finally {
       setLoading(false)
     }
@@ -41,10 +40,8 @@ export default function SubscriptionPlanDetailsPage() {
     try {
       setDeleting(true)
       // TODO: Implement delete functionality
-      console.warn('Delete functionality not yet implemented')
       router.push('/admin/subscription-plans')
     } catch (error) {
-      console.error('Error deleting plan:', error)
     } finally {
       setDeleting(false)
       setShowDeleteModal(false)

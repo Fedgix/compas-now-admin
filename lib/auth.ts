@@ -86,7 +86,6 @@ class AuthService {
       // Notify listeners after state is set
       this.notifyListeners()
     } catch (error) {
-      console.error('Error initializing auth state:', error)
       this.clearAuth()
     }
   }
@@ -111,23 +110,17 @@ class AuthService {
 
   // Login admin
   async login(email: string, password: string): Promise<LoginResponse> {
-    console.log('🔧 AuthService.login called with:', { email, password: '***' })
     this.authState.isLoading = true
     this.notifyListeners()
 
     try {
-      console.log('🔧 About to import apiService...')
       // Import apiService dynamically to avoid circular dependency
       const { apiService } = await import('./api')
-      console.log('🔧 apiService imported:', apiService)
-      console.log('🔧 apiService.post method:', typeof apiService.post)
       
-      console.log('🌐 Making API request to /admin/login')
       const response = await apiService.post('/admin/login', {
         email,
         password
       }) as any
-      console.log('📡 API response:', response)
 
       if (response.status === 'success') {
         const { admin, tokens } = response.data
@@ -158,7 +151,6 @@ class AuthService {
       this.authState.isLoading = false
       this.notifyListeners()
       
-      console.error('Login error:', error)
       return {
         success: false,
         message: error.response?.data?.message || 'Login failed. Please try again.'
@@ -177,11 +169,9 @@ class AuthService {
         try {
           await apiService.post('/admin/logout')
         } catch (error) {
-          console.warn('Logout API call failed:', error)
         }
       }
     } catch (error) {
-      console.warn('Error during logout:', error)
     } finally {
       this.clearAuth()
     }
@@ -234,7 +224,6 @@ class AuthService {
         return false
       }
     } catch (error) {
-      console.error('Token refresh failed:', error)
       this.clearAuth()
       return false
     }

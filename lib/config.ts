@@ -36,12 +36,7 @@ export const getCurrentEnvironment = (): Environment => {
   if (typeof window === 'undefined') return 'development'
   
   const stored = localStorage.getItem('compas-admin-environment')
-  console.log('🔧 getCurrentEnvironment: stored value:', stored)
-  
-  // Return stored value or default to development
-  const result = (stored as Environment) || 'development'
-  console.log('🔧 getCurrentEnvironment: returning:', result)
-  return result
+  return (stored as Environment) || 'development'
 }
 
 export const setCurrentEnvironment = (env: Environment): void => {
@@ -51,8 +46,5 @@ export const setCurrentEnvironment = (env: Environment): void => {
 
 export const getCurrentConfig = (): EnvironmentConfig => {
   const currentEnv = getCurrentEnvironment()
-  console.log('🔧 getCurrentConfig called, currentEnv:', currentEnv)
-  const config = environments[currentEnv]
-  console.log('🔧 getCurrentConfig returning:', config)
-  return config
+  return environments[currentEnv]
 }

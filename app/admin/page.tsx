@@ -23,7 +23,6 @@ export default function AdminDashboard() {
       setIsLoading(true)
       setError(null)
       
-      console.log(`🔄 Fetching dashboard data for ${currentConfig.name}...`)
       
       const dashboardData = await dashboardApiService.getDashboardStats()
       setStats(dashboardData)
@@ -31,7 +30,6 @@ export default function AdminDashboard() {
       
       toast.success(`Dashboard data loaded from ${currentConfig.name}`)
     } catch (error: any) {
-      console.error('Error fetching dashboard data:', error)
       setError(error.message || 'Failed to load dashboard data')
       toast.error(`Failed to load data from ${currentConfig.name}`)
     } finally {

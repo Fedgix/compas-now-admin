@@ -159,7 +159,6 @@ export default function EditSubscriptionPlanPage() {
         })
       }
     } catch (error) {
-      console.error('Error fetching subscription plan:', error)
     } finally {
       setLoading(false)
     }
@@ -250,7 +249,6 @@ export default function EditSubscriptionPlanPage() {
         router.push(`/admin/subscription-plans/${params.id}`)
       }
     } catch (error) {
-      console.error('Error updating plan:', error)
     } finally {
       setSaving(false)
     }

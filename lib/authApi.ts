@@ -35,7 +35,6 @@ class AuthApiService {
   // Login admin
   async login(credentials: AdminLoginData): Promise<AdminAuthResponse> {
     try {
-      console.log('🔐 Attempting admin login...')
       
       // Hardcoded to localhost:8000 for now
       const loginUrl = 'http://localhost:8000/api/admin/login'
@@ -57,13 +56,11 @@ class AuthApiService {
         // Store admin info
         this.setAdmin(data.data.admin)
         
-        console.log('✅ Admin login successful')
         return data
       }
       
       throw new Error(data.message || 'Login failed')
     } catch (error: any) {
-      console.error('❌ Admin login error:', error)
       throw error
     }
   }
@@ -78,9 +75,7 @@ class AuthApiService {
       }
       
       this.clearAuth()
-      console.log('✅ Admin logged out')
     } catch (error: any) {
-      console.error('❌ Admin logout error:', error)
       this.clearAuth()
     }
   }
@@ -103,7 +98,6 @@ class AuthApiService {
       
       return false
     } catch (error: any) {
-      console.error('❌ Token refresh error:', error)
       return false
     }
   }
@@ -120,7 +114,6 @@ class AuthApiService {
       
       return null
     } catch (error: any) {
-      console.error('❌ Get profile error:', error)
       return null
     }
   }

@@ -12,7 +12,6 @@ export default function SimpleLogin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('🚀 Simple login form submitted!', { email, password: password ? '***' : 'empty' })
     
     if (!email || !password) {
       toast.error('Please fill in all fields')
@@ -32,7 +31,6 @@ export default function SimpleLogin() {
       })
 
       const data = await response.json()
-      console.log('📡 API response:', data)
 
       if (data.status === 'success') {
         toast.success(`Welcome back, ${data.data.admin.name}!`)
@@ -41,7 +39,6 @@ export default function SimpleLogin() {
         toast.error(data.message || 'Login failed')
       }
     } catch (error: any) {
-      console.error('💥 Login error:', error)
       toast.error('Login failed. Please try again.')
     } finally {
       setIsLoading(false)

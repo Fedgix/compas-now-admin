@@ -69,7 +69,6 @@ export default function SubscriptionPlansAnalyticsPage() {
         utilizationStats: utilizationResponse || []
       })
     } catch (error) {
-      console.error('Error fetching analytics:', error)
     } finally {
       setLoading(false)
     }

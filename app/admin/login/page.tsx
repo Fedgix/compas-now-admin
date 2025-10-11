@@ -12,67 +12,44 @@ export default function AdminLogin() {
   const router = useRouter()
 
   // Debug: Component mount
-  console.log('🔧 AdminLogin component mounted')
-  console.log('🔧 Router:', router)
 
   // Test function
   const testClick = () => {
-    console.log('🧪 TEST CLICK WORKING!')
     alert('Button click is working!')
   }
 
   // Check if already authenticated
   useEffect(() => {
-    console.log('🔧 useEffect: Checking authentication...')
     const authState = authService.getAuthState()
-    console.log('🔧 Auth state:', authState)
     if (authState.isAuthenticated) {
-      console.log('🔧 Already authenticated, redirecting...')
       router.push('/admin')
     } else {
-      console.log('🔧 Not authenticated, staying on login page')
     }
   }, [router])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log('🔧 handleSubmit called!')
     e.preventDefault()
-    console.log('🚀 Form submitted!', { email, password: password ? '***' : 'empty' })
     
     if (!email || !password) {
-      console.log('❌ Validation failed - missing fields')
       toast.error('Please fill in all fields')
       return
     }
 
-    console.log('✅ Validation passed, starting login...')
-    console.log('🔧 About to call authService.login...')
     setIsLoading(true)
     
     try {
-      console.log('🔄 Sending login request...', { email, password: '***' })
-      console.log('🔧 authService object:', authService)
-      console.log('🔧 authService.login method:', typeof authService.login)
       
       const response = await authService.login(email, password)
-      console.log('✅ Login response received:', response)
       
       if (response.success) {
-        console.log('🎉 Login successful!', response.data?.admin)
         toast.success(`Welcome back, ${response.data?.admin.name}!`)
         router.push('/admin')
       } else {
-        console.log('❌ Login failed:', response.message)
         toast.error(response.message || 'Login failed')
       }
     } catch (error: any) {
-      console.error('💥 Login error:', error)
-      console.error('💥 Error response:', error.response?.data)
-      console.error('💥 Error message:', error.message)
-      console.error('💥 Error stack:', error.stack)
       toast.error('Login failed. Please try again.')
     } finally {
-      console.log('🔧 Setting isLoading to false')
       setIsLoading(false)
     }
   }
@@ -149,7 +126,6 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={isLoading}
-              onClick={() => console.log('🖱️ Login button clicked!')}
               className="w-full btn-primary py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (

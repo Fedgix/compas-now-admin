@@ -64,7 +64,6 @@ export default function BookingsPage() {
   const fetchBookings = async () => {
     try {
       setIsLoading(true)
-      console.log('🔧 Fetching bookings from:', currentConfig.baseUrl)
       
       // Mock data for demonstration
       const mockBookings: Booking[] = [
@@ -130,10 +129,8 @@ export default function BookingsPage() {
       ]
       
       setBookings(mockBookings)
-      console.log('📡 Bookings loaded:', mockBookings.length)
       
     } catch (error: any) {
-      console.error('❌ Error fetching bookings:', error)
       setError(error.response?.data?.message || error.message || 'Failed to fetch bookings')
     } finally {
       setIsLoading(false)
@@ -143,7 +140,6 @@ export default function BookingsPage() {
   // Fetch booking statistics
   const fetchBookingStats = async () => {
     try {
-      console.log('🔧 Fetching booking stats...')
       
       // Mock stats for demonstration
       const mockStats: BookingStats = {
@@ -167,17 +163,14 @@ export default function BookingsPage() {
       }
       
       setStats(mockStats)
-      console.log('📡 Booking stats loaded:', mockStats)
       
     } catch (error: any) {
-      console.error('❌ Error fetching booking stats:', error)
     }
   }
 
   // Update booking status
   const handleUpdateBookingStatus = async (bookingId: string, newStatus: string) => {
     try {
-      console.log('🔧 Updating booking status:', bookingId, newStatus)
       
       // Note: This endpoint might not exist in backend
       // const response = await apiService.put(`/admin/bookings/${bookingId}/status`, { status: newStatus }) as any
@@ -186,7 +179,6 @@ export default function BookingsPage() {
       fetchBookings()
       
     } catch (error: any) {
-      console.error('❌ Error updating booking status:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to update booking status')
     }
   }
@@ -194,7 +186,6 @@ export default function BookingsPage() {
   // Process refund
   const handleProcessRefund = async (bookingId: string, refundAmount: number, reason: string) => {
     try {
-      console.log('🔧 Processing refund:', bookingId, refundAmount, reason)
       
       // Note: This endpoint might not exist in backend
       // const response = await apiService.post(`/admin/bookings/${bookingId}/refund`, { 
@@ -208,7 +199,6 @@ export default function BookingsPage() {
       fetchBookings()
       
     } catch (error: any) {
-      console.error('❌ Error processing refund:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to process refund')
     }
   }
@@ -216,7 +206,6 @@ export default function BookingsPage() {
   // Get booking details
   const handleGetBookingDetails = async (bookingId: string) => {
     try {
-      console.log('🔧 Getting booking details for:', bookingId)
       
       const booking = bookings.find(b => b.id === bookingId)
       if (booking) {
@@ -225,7 +214,6 @@ export default function BookingsPage() {
       }
       
     } catch (error: any) {
-      console.error('❌ Error getting booking details:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to get booking details')
     }
   }
@@ -233,7 +221,6 @@ export default function BookingsPage() {
   // Export bookings
   const handleExportBookings = async () => {
     try {
-      console.log('🔧 Exporting bookings...')
       
       // Create CSV content
       const csvContent = [
@@ -262,7 +249,6 @@ export default function BookingsPage() {
       toast.success('Bookings exported successfully!')
       
     } catch (error: any) {
-      console.error('❌ Error exporting bookings:', error)
       toast.error('Failed to export bookings')
     }
   }

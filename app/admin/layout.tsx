@@ -29,7 +29,6 @@ export default function AdminLayout({
     try {
       // Check if tokens exist
       if (!authApiService.isAuthenticated()) {
-        console.log('❌ No authentication found, redirecting to login...')
         router.push('/login')
         return
       }
@@ -41,17 +40,14 @@ export default function AdminLayout({
       const profile = await authApiService.getProfile()
 
       if (!profile) {
-        console.log('❌ Invalid token, redirecting to login...')
         authApiService.clearAuth()
         router.push('/login')
         return
       }
 
-      console.log('✅ Admin authenticated:', profile)
       setAdmin(profile)
       setIsAuthenticated(true)
     } catch (error: any) {
-      console.error('❌ Auth check failed:', error)
       
       // Try to refresh token
       const refreshed = await authApiService.refreshToken()
@@ -75,7 +71,6 @@ export default function AdminLayout({
       toast.success('Logged out successfully')
       router.push('/login')
     } catch (error) {
-      console.error('Logout error:', error)
       toast.error('Logout failed')
     }
   }

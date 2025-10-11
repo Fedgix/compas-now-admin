@@ -181,7 +181,6 @@ export default function CreateSubscriptionPlanPage() {
         router.push('/admin/subscription-plans')
       }
     } catch (error) {
-      console.error('Error creating plan:', error)
     } finally {
       setLoading(false)
     }

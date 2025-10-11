@@ -28,7 +28,6 @@ export default function PersonsPage() {
       setPersons(response.data || [])
       setTotalPages(response.pagination?.totalPages || 1)
     } catch (error) {
-      console.error('Error loading persons:', error)
       toast.error('Failed to load persons')
     } finally {
       setLoading(false)
@@ -80,7 +79,6 @@ export default function PersonsPage() {
           isActive: true as boolean
         })
       } catch (error) {
-        console.error('Error creating person:', error)
         toast.error('Failed to create person')
       } finally {
         setLoading(false)
@@ -249,7 +247,6 @@ export default function PersonsPage() {
         setSelectedPerson(null)
         loadPersons(currentPage, searchTerm, filterActive)
       } catch (error) {
-        console.error('Error updating person:', error)
         toast.error('Failed to update person')
       } finally {
         setLoading(false)

@@ -25,7 +25,6 @@ export default function MoviesPage() {
       const response = await movieApiService.getAllMovies(params)
       setMovies(response.movies || [])
     } catch (error: any) {
-      console.error('❌ Error fetching movies:', error)
       toast.error(error.response?.data?.message || 'Failed to fetch movies')
     } finally {
       setLoading(false)
@@ -39,10 +38,8 @@ export default function MoviesPage() {
   // Create new movie
   const handleCreateMovie = async (movieData: CreateMovieData) => {
     try {
-      console.log('🔧 Creating movie:', movieData)
       
       const response = await movieApiService.createMovie(movieData)
-      console.log('📡 Create movie response:', response)
       
       if (response) {
         toast.success('Movie created successfully!')
@@ -50,7 +47,6 @@ export default function MoviesPage() {
         fetchMovies()
       }
     } catch (error: any) {
-      console.error('❌ Error creating movie:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to create movie')
     }
   }
@@ -58,10 +54,8 @@ export default function MoviesPage() {
   // Update movie
   const handleUpdateMovie = async (movieId: string, movieData: Partial<CreateMovieData>) => {
     try {
-      console.log('🔧 Updating movie:', movieId, movieData)
       
       const response = await movieApiService.updateMovie(movieId, movieData)
-      console.log('📡 Update movie response:', response)
       
       if (response) {
         toast.success('Movie updated successfully!')
@@ -70,7 +64,6 @@ export default function MoviesPage() {
         fetchMovies()
       }
     } catch (error: any) {
-      console.error('❌ Error updating movie:', error)
       toast.error(error.response?.data?.message || error.message || 'Failed to update movie')
     }
   }
@@ -84,7 +77,6 @@ export default function MoviesPage() {
       toast.success('Movie deleted successfully!')
       fetchMovies()
     } catch (error: any) {
-      console.error('❌ Error deleting movie:', error)
       toast.error(error.response?.data?.message || 'Failed to delete movie')
     }
   }
@@ -96,7 +88,6 @@ export default function MoviesPage() {
       toast.success(`Movie ${!movie.isActive ? 'activated' : 'deactivated'} successfully!`)
       fetchMovies()
     } catch (error: any) {
-      console.error('❌ Error toggling movie status:', error)
       toast.error('Failed to update movie status')
     }
   }
@@ -108,7 +99,6 @@ export default function MoviesPage() {
       toast.success(`Movie ${!movie.isFeatured ? 'featured' : 'unfeatured'} successfully!`)
       fetchMovies()
     } catch (error: any) {
-      console.error('❌ Error toggling featured status:', error)
       toast.error('Failed to update featured status')
     }
   }
@@ -311,11 +301,9 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
       setLoadingPersons(true)
       try {
         const response = await movieApiService.getAllPersons({ limit: 100 })
-        console.log('Persons response:', response)
         // Backend returns { status: 'success', data: persons[], pagination: {} }
         setPersons((response as any)?.data || [])
       } catch (error) {
-        console.error('Error loading persons:', error)
         toast.error('Failed to load persons')
         setPersons([])
       } finally {
@@ -376,7 +364,6 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
         setLocalBackdropPreview(null)
       }
     } catch (error) {
-      console.error('Image upload error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload image'
       toast.error(`Upload failed: ${errorMessage}`)
       
@@ -985,11 +972,9 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
       setLoadingPersons(true)
       try {
         const response = await movieApiService.getAllPersons({ limit: 100 })
-        console.log('Persons response:', response)
         // Backend returns { status: 'success', data: persons[], pagination: {} }
         setPersons((response as any)?.data || [])
       } catch (error) {
-        console.error('Error loading persons:', error)
         toast.error('Failed to load persons')
         setPersons([])
       } finally {
@@ -1050,7 +1035,6 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
         setLocalBackdropPreview(null)
       }
     } catch (error) {
-      console.error('Image upload error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to upload image'
       toast.error(`Upload failed: ${errorMessage}`)
       

@@ -99,11 +99,6 @@ export class MovieApiService {
     }
 
     try {
-      console.log('Uploading to Cloudinary:', {
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type
-      })
 
       // Generate signature for signed upload
       const timestamp = Math.round(new Date().getTime() / 1000)
@@ -130,15 +125,12 @@ export class MovieApiService {
       
       if (!response.ok) {
         const errorData = await response.json()
-        console.error('Cloudinary upload error response:', errorData)
         throw new Error(`Upload failed: ${errorData.error?.message || 'Unknown error'}`)
       }
       
       const data = await response.json()
-      console.log('Cloudinary upload success:', data)
       return data.secure_url
     } catch (error) {
-      console.error('Cloudinary upload error:', error)
       throw error
     }
   }
@@ -180,7 +172,6 @@ export class MovieApiService {
 
       return (response as any).data?.url || response
     } catch (error) {
-      console.error('Backend upload error:', error)
       throw error
     }
   }
