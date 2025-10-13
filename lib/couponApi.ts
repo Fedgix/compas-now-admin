@@ -78,7 +78,7 @@ export class CouponApiService {
     isActive?: boolean
     eventId?: string
   }) {
-    const response = await apiService.get('/discount-coupons', params)
+    const response = await apiService.get('/discount-coupons/all', params)
     return response.data
   }
 
