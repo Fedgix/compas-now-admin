@@ -78,69 +78,70 @@ export class CouponApiService {
     isActive?: boolean
     eventId?: string
   }) {
-    const response = await apiService.get('/discount-coupons/all', params)
+    // apiService.get already returns response.data
     // Backend returns: { success: true, coupons: [...], pagination: {...} }
-    return response.data
+    const response = await apiService.get('/discount-coupons/all', params)
+    return response
   }
 
   // Get coupon by ID
   async getCouponById(id: string) {
     const response = await apiService.get(`/discount-coupons/${id}`)
-    return response.data
+    return response
   }
 
   // Create new coupon
   async createCoupon(couponData: CreateCouponData) {
     const response = await apiService.post('/discount-coupons', couponData)
-    return response.data
+    return response
   }
 
   // Update coupon
   async updateCoupon(id: string, couponData: Partial<CreateCouponData>) {
     const response = await apiService.put(`/discount-coupons/${id}`, couponData)
-    return response.data
+    return response
   }
 
   // Delete coupon (soft delete)
   async deleteCoupon(id: string) {
     const response = await apiService.delete(`/discount-coupons/${id}`)
-    return response.data
+    return response
   }
 
   // Toggle coupon active status
   async toggleCouponStatus(id: string, isActive: boolean) {
     const response = await apiService.patch(`/discount-coupons/${id}/status`, { isActive })
-    return response.data
+    return response
   }
 
   // Get all coupon templates
   async getCouponTemplates() {
     const response = await apiService.get('/discount-coupons/templates')
-    return response.data
+    return response
   }
 
   // Get coupon usage statistics
   async getCouponStats(id: string) {
     const response = await apiService.get(`/discount-coupons/${id}/stats`)
-    return response.data
+    return response
   }
 
   // Generate unique coupon code
   async generateCouponCode(prefix?: string) {
     const response = await apiService.post('/discount-coupons/generate-code', { prefix })
-    return response.data
+    return response
   }
 
   // Validate coupon code (check if already exists)
   async validateCouponCode(couponCode: string) {
     const response = await apiService.post('/discount-coupons/validate-code', { couponCode })
-    return response.data
+    return response
   }
 
   // Get coupons by event
   async getCouponsByEvent(eventId: string) {
     const response = await apiService.get(`/discount-coupons/event/${eventId}`)
-    return response.data
+    return response
   }
 }
 
