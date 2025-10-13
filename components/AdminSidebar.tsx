@@ -16,10 +16,11 @@ const menuItems = [
   { href: '/admin/persons', label: 'Persons', icon: '👤' },
   { href: '/admin/users', label: 'Users', icon: '👥' },
   { href: '/admin/bookings', label: 'Bookings', icon: '🎫' },
+  { href: '/admin/coupons', label: 'Discount Coupons', icon: '🎟️' },
   { href: '/admin/payments', label: 'Payments', icon: '💳' },
   { 
     label: 'Movie Pass System',
-    icon: '🎟️',
+    icon: '🎬',
     isGroup: true,
     items: [
       { href: '/admin/subscription-plans', label: 'Subscription Plans', icon: '🎭' },
