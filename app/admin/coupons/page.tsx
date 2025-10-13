@@ -130,7 +130,7 @@ export default function CouponsPage() {
             </thead>
             <tbody className="divide-y divide-gray-700">
               {coupons.length === 0 ? (
-                <tr>
+                <tr key="empty-state">
                   <td colSpan={6} className="px-6 py-8 text-center text-gray-400">
                     No coupons found. Create your first coupon!
                   </td>
