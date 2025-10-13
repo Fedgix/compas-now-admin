@@ -79,6 +79,7 @@ export class CouponApiService {
     eventId?: string
   }) {
     const response = await apiService.get('/discount-coupons/all', params)
+    // Backend returns: { success: true, coupons: [...], pagination: {...} }
     return response.data
   }
 

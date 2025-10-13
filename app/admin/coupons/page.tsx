@@ -29,8 +29,10 @@ export default function CouponsPage() {
     try {
       setIsLoading(true)
       const response = await couponApiService.getAllCoupons({ limit: 100 })
-      setCoupons(response.data || [])
+      // Backend returns: { success: true, coupons: [...] }
+      setCoupons(response.coupons || [])
     } catch (error: any) {
+      console.error('Fetch coupons error:', error)
       toast.error(error.response?.data?.message || 'Failed to fetch coupons')
     } finally {
       setIsLoading(false)
