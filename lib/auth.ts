@@ -59,9 +59,9 @@ class AuthService {
     }
 
     try {
-      const token = localStorage.getItem('admin_token')
+      const token = localStorage.getItem('admin_token') || localStorage.getItem('admin_access_token')
       const refreshToken = localStorage.getItem('admin_refresh_token')
-      const userStr = localStorage.getItem('admin_user')
+      const userStr = localStorage.getItem('admin_user') || localStorage.getItem('admin_info')
 
       if (token && userStr) {
         const user = JSON.parse(userStr)
@@ -130,6 +130,10 @@ class AuthService {
         localStorage.setItem('admin_token', accessToken)
         localStorage.setItem('admin_refresh_token', refreshToken || '')
         localStorage.setItem('admin_user', JSON.stringify(admin))
+        
+        // Also store in new format for compatibility
+        localStorage.setItem('admin_access_token', accessToken)
+        localStorage.setItem('admin_info', JSON.stringify(admin))
 
         // Update auth state
         this.authState = {
@@ -182,6 +186,8 @@ class AuthService {
     localStorage.removeItem('admin_token')
     localStorage.removeItem('admin_refresh_token')
     localStorage.removeItem('admin_user')
+    localStorage.removeItem('admin_access_token')
+    localStorage.removeItem('admin_info')
 
     this.authState = {
       isAuthenticated: false,

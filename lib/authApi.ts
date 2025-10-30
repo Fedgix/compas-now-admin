@@ -35,9 +35,10 @@ class AuthApiService {
   // Login admin
   async login(credentials: AdminLoginData): Promise<AdminAuthResponse> {
     try {
-      
-      // Hardcoded to localhost:8000 for now
-      const loginUrl = 'http://localhost:8000/api/admin/login'
+      // Use config-based URL
+      const { getCurrentConfig } = await import('./config')
+      const config = getCurrentConfig()
+      const loginUrl = `${config.baseUrl}/admin/login`
       
       const response = await fetch(loginUrl, {
         method: 'POST',
@@ -55,6 +56,9 @@ class AuthApiService {
         
         // Store admin info
         this.setAdmin(data.data.admin)
+        
+        // Update API service with new token
+        apiService.setAuthToken(data.data.tokens.accessToken)
         
         return data
       }
@@ -131,7 +135,7 @@ class AuthApiService {
 
   getAccessToken(): string | null {
     if (typeof window === 'undefined') return null
-    return localStorage.getItem('admin_token')
+    return localStorage.getItem('admin_access_token')
   }
 
   getRefreshToken(): string | null {
@@ -172,6 +176,9 @@ class AuthApiService {
     localStorage.removeItem('admin_access_token')
     localStorage.removeItem('admin_refresh_token')
     localStorage.removeItem('admin_info')
+    // Also clear old token keys for compatibility
+    localStorage.removeItem('admin_token')
+    localStorage.removeItem('admin_user')
     
     apiService.setAuthToken(null)
   }

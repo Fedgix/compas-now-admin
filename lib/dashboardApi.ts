@@ -113,6 +113,17 @@ class DashboardApiService {
     }
   }
 
+  // User growth series API
+  async getUserGrowthSeries(params: { startDate?: string; endDate?: string; groupBy?: 'daily'|'weekly'|'monthly'; tz?: string }): Promise<{ series: { date: string; count: number }[]; totals: { rangeNewUsers: number; allTimeUsers: number } }> {
+    const query = new URLSearchParams()
+    if (params.startDate) query.append('startDate', params.startDate)
+    if (params.endDate) query.append('endDate', params.endDate)
+    if (params.groupBy) query.append('groupBy', params.groupBy)
+    if (params.tz) query.append('tz', params.tz)
+    const resp = await apiService.get<any>(`/platform-analytics/users?${query.toString()}`)
+    return resp.data || { series: [], totals: { rangeNewUsers: 0, allTimeUsers: 0 } }
+  }
+
   // Get recent bookings
   async getRecentBookings(): Promise<Booking[]> {
     try {

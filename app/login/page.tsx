@@ -3,10 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast'
-import { authApiService } from '../../lib/authApi'
+import { useAuth } from '../../contexts/AuthContext'
 
 export default function LoginPage() {
   const router = useRouter()
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -18,16 +19,16 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await authApiService.login(formData)
+      const success = await login(formData.email, formData.password)
 
-      if (response.status === 'success') {
+      if (success) {
         toast.success('Login successful!')
         router.push('/admin')
       } else {
-        toast.error(response.message || 'Login failed')
+        toast.error('Login failed')
       }
     } catch (error: any) {
-      toast.error(error.response?.data?.message || error.message || 'Login failed')
+      toast.error(error.message || 'Login failed')
     } finally {
       setIsLoading(false)
     }

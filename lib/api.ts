@@ -20,7 +20,7 @@ class ApiService {
         config.baseURL = envConfig.baseUrl
         
         // Add auth token if available
-        const token = this.authToken || localStorage.getItem('admin_token')
+        const token = this.authToken || localStorage.getItem('admin_access_token') || localStorage.getItem('admin_token')
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
         }
