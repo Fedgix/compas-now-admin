@@ -11,6 +11,8 @@ export default function UsersAnalyticsPage() {
   const [error, setError] = useState<string | null>(null)
   const [series, setSeries] = useState<{ date: string; count: number }[]>([])
   const [totals, setTotals] = useState<{ rangeNewUsers: number; allTimeUsers: number }>({ rangeNewUsers: 0, allTimeUsers: 0 })
+  const [activeSeries, setActiveSeries] = useState<{ date: string; count: number }[]>([])
+  const [activeTotals, setActiveTotals] = useState<{ rangeActiveUsers: number; allTimeActiveUsers: number }>({ rangeActiveUsers: 0, allTimeActiveUsers: 0 })
   const [hoverIdx, setHoverIdx] = useState<number | null>(null)
 
   const { startDate, endDate } = useMemo(() => {
@@ -30,6 +32,9 @@ export default function UsersAnalyticsPage() {
         const data = await dashboardApiService.getUserGrowthSeries({ startDate, endDate, groupBy: period, tz: 'Asia/Kolkata' })
         setSeries(data.series || [])
         setTotals(data.totals || { rangeNewUsers: 0, allTimeUsers: 0 })
+        const act = await dashboardApiService.getActiveUsersSeries({ startDate, endDate, groupBy: period, tz: 'Asia/Kolkata' })
+        setActiveSeries(act.series || [])
+        setActiveTotals(act.totals || { rangeActiveUsers: 0, allTimeActiveUsers: 0 })
         if (data?.series) {
           // Debug: log first few points
           // eslint-disable-next-line no-console
@@ -95,6 +100,35 @@ export default function UsersAnalyticsPage() {
             period={period}
           />
         )}
+      </div>
+
+      <div className="rounded-lg border p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <div className="text-sm text-gray-600">Active Users (Successful Transactions)</div>
+          <div className="text-xs text-gray-500">{new Date(startDate).toLocaleDateString()} - {new Date(endDate).toLocaleDateString()}</div>
+        </div>
+        {loading ? (
+          <div className="text-sm text-gray-500">Loading...</div>
+        ) : error ? (
+          <div className="text-sm text-red-600">{error}</div>
+        ) : (
+          <Chart
+            data={activeSeries}
+            hoverIdx={hoverIdx}
+            setHoverIdx={setHoverIdx}
+            period={period}
+          />
+        )}
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="rounded-lg border p-4">
+            <div className="text-sm text-gray-500">Active Users (Range)</div>
+            <div className="text-2xl font-semibold">{activeTotals.rangeActiveUsers}</div>
+          </div>
+          <div className="rounded-lg border p-4">
+            <div className="text-sm text-gray-500">All-time Active Users</div>
+            <div className="text-2xl font-semibold">{activeTotals.allTimeActiveUsers}</div>
+          </div>
+        </div>
       </div>
     </div>
   )

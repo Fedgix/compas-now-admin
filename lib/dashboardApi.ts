@@ -124,6 +124,17 @@ class DashboardApiService {
     return resp.data || { series: [], totals: { rangeNewUsers: 0, allTimeUsers: 0 } }
   }
 
+  // Active users by transactions series
+  async getActiveUsersSeries(params: { startDate?: string; endDate?: string; groupBy?: 'daily'|'weekly'|'monthly'; tz?: string }): Promise<{ series: { date: string; count: number }[]; totals: { rangeActiveUsers: number; allTimeActiveUsers: number } }> {
+    const query = new URLSearchParams()
+    if (params.startDate) query.append('startDate', params.startDate)
+    if (params.endDate) query.append('endDate', params.endDate)
+    if (params.groupBy) query.append('groupBy', params.groupBy)
+    if (params.tz) query.append('tz', params.tz)
+    const resp = await apiService.get<any>(`/platform-analytics/active-users?${query.toString()}`)
+    return resp.data || { series: [], totals: { rangeActiveUsers: 0, allTimeActiveUsers: 0 } }
+  }
+
   // Get recent bookings
   async getRecentBookings(): Promise<Booking[]> {
     try {
