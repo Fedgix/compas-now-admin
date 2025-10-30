@@ -15,6 +15,7 @@ const menuItems = [
   { href: '/admin/movies', label: 'Movies', icon: '🎞️' },
   { href: '/admin/persons', label: 'Persons', icon: '👤' },
   { href: '/admin/users', label: 'Users', icon: '👥' },
+  { href: '/admin/users/analytics', label: 'Users Analytics', icon: '📈' },
   { href: '/admin/bookings', label: 'Bookings', icon: '🎫' },
   { href: '/admin/coupons', label: 'Discount Coupons', icon: '🎟️' },
   { href: '/admin/payments', label: 'Payments', icon: '💳' },
