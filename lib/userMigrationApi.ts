@@ -73,13 +73,25 @@ interface Batch {
 interface MigrationResult {
   success: boolean
   message: string
-  oldBundle: {
+  bundle: {
+    _id: string
+    bundleId: string
+    planId: string
+    planName: string
+    couponCount: number
+    remainingCoupons: number
+    expiresAt: string
+    migratedFrom?: string
+    migratedAt?: string
+  }
+  // Legacy support for old response format
+  oldBundle?: {
     bundleId: string
     planId: string
     remainingCoupons: number
     status: string
   }
-  newBundle: {
+  newBundle?: {
     _id: string
     bundleId: string
     planId: string

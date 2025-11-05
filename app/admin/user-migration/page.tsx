@@ -201,7 +201,7 @@ export default function UserMigrationPage() {
         selectedBatch._id
       )
 
-      toast.success(`User migrated successfully! New bundle: ${result.newBundle.bundleId}`)
+      toast.success(`User migrated successfully! Bundle: ${result.bundle?.bundleId || (result as any).newBundle?.bundleId || 'N/A'}`)
       
       // Reload users to reflect changes
       if (sourcePlan) {
