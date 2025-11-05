@@ -19,12 +19,16 @@ const menuItems = [
   { href: '/admin/bookings', label: 'Bookings', icon: '🎫' },
   { href: '/admin/coupons', label: 'Discount Coupons', icon: '🎟️' },
   { href: '/admin/payments', label: 'Payments', icon: '💳' },
+  { href: '/admin/easebuzz-transactions', label: 'Easebuzz Transactions', icon: '📊' },
+  { href: '/admin/migration', label: 'Image Migration', icon: '🔄' },
   { 
     label: 'Movie Pass System',
     icon: '🎬',
     isGroup: true,
     items: [
       { href: '/admin/subscription-plans', label: 'Subscription Plans', icon: '🎭' },
+      { href: '/admin/welcome-pass', label: 'Welcome Pass', icon: '🎁' },
+      { href: '/admin/user-migration', label: 'User Migration', icon: '🔄' },
       { href: '/admin/movie-passes/analytics', label: 'Movie Pass Batches', icon: '📦' },
       { href: '/admin/movie-passes/import-excel', label: 'Import Excel', icon: '📊' },
       { 

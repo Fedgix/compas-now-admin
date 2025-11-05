@@ -28,7 +28,7 @@ export default function CouponsPage() {
   const fetchCoupons = async () => {
     try {
       setIsLoading(true)
-      const response = await couponApiService.getAllCoupons({ limit: 100 })
+      const response: any = await couponApiService.getAllCoupons({ limit: 100 })
       // Backend returns: { success: true, coupons: [...] }
       setCoupons(response.coupons || [])
     } catch (error: any) {
@@ -42,7 +42,7 @@ export default function CouponsPage() {
   // Fetch events for dropdown
   const fetchEvents = async () => {
     try {
-      const response = await apiService.get('/events')
+      const response: any = await apiService.get('/events')
       setEvents(response.data?.data || [])
     } catch (error) {
       console.error('Failed to fetch events:', error)

@@ -12,7 +12,7 @@ export default function MoviesPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
-  const [filterActive, setFilterActive] = useState<boolean | undefined>(undefined)
+  const [filterActive, setFilterActive] = useState<boolean | undefined>(true) // Default to showing only active movies
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1)
@@ -70,6 +70,17 @@ export default function MoviesPage() {
   // Update movie
   const handleUpdateMovie = async (movieId: string, movieData: Partial<CreateMovieData>) => {
     try {
+      // LOG: Check what data is being sent to API
+      console.log('🔍 [MoviesPage] handleUpdateMovie called:', {
+        movieId,
+        movieData,
+        releaseDate: movieData.releaseDate,
+        releaseDateType: typeof movieData.releaseDate,
+        genres: movieData.genres,
+        cast: movieData.cast,
+        crew: movieData.crew,
+        productionCompanies: movieData.productionCompanies
+      })
       
       const response = await movieApiService.updateMovie(movieId, movieData)
       
@@ -92,10 +103,14 @@ export default function MoviesPage() {
       await movieApiService.deleteMovie(movieId)
       toast.success('Movie deleted successfully!')
       
+      // Remove deleted movie from local state immediately (soft delete sets isActive: false)
+      setMovies(prevMovies => prevMovies.filter(movie => movie.id !== movieId))
+      
       // If we deleted the last item on current page, go to previous page
       if (movies.length === 1 && currentPage > 1) {
         setCurrentPage(prev => prev - 1)
       } else {
+        // Refetch to update pagination and ensure list is correct
         fetchMovies()
       }
     } catch (error: any) {
@@ -245,6 +260,17 @@ export default function MoviesPage() {
                     <div className="flex space-x-2">
                       <button
                         onClick={() => {
+                          // LOG: Check what movie is being set for edit
+                          console.log('🔍 [MoviesPage] Setting movie for edit:', {
+                            movie,
+                            releaseDate: movie.releaseDate,
+                            releaseDateType: typeof movie.releaseDate,
+                            genres: movie.genres,
+                            cast: movie.cast,
+                            crew: movie.crew,
+                            productionCompanies: movie.productionCompanies,
+                            allFields: Object.keys(movie)
+                          })
                           setSelectedMovie(movie)
                           setShowEditModal(true)
                         }}
@@ -418,6 +444,10 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
   const [localBackdropPreview, setLocalBackdropPreview] = useState<string | null>(null)
   const [posterUploadSuccess, setPosterUploadSuccess] = useState(false)
   const [backdropUploadSuccess, setBackdropUploadSuccess] = useState(false)
+  const [posterInputMode, setPosterInputMode] = useState<'upload' | 'url'>('upload')
+  const [backdropInputMode, setBackdropInputMode] = useState<'upload' | 'url'>('upload')
+  const [posterUrlInput, setPosterUrlInput] = useState('')
+  const [backdropUrlInput, setBackdropUrlInput] = useState('')
   const [persons, setPersons] = useState<Person[]>([])
   const [loadingPersons, setLoadingPersons] = useState(false)
 
@@ -476,28 +506,30 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
 
     setUploadingImage(true)
     try {
-      // Use direct Cloudinary upload
-      const imageUrl = await movieApiService.uploadToCloudinary(file)
-      setFormData(prev => ({ ...prev, [field]: imageUrl }))
-      toast.success('Image uploaded successfully!')
+      // Convert to base64 and pass to backend (backend will handle S3 upload)
+      const base64Data = await movieApiService.convertToBase64(file)
+      
+      // Set base64 data directly in formData (backend will upload to S3)
+      setFormData(prev => ({ ...prev, [field]: base64Data }))
+      toast.success('Image ready! Will upload to S3 when you save the movie.')
       
       // Set upload success state
       if (field === 'posterPath') {
         setPosterUploadSuccess(true)
-        setLocalPosterPreview(null)
       } else {
         setBackdropUploadSuccess(true)
-        setLocalBackdropPreview(null)
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to upload image'
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process image'
       toast.error(`Upload failed: ${errorMessage}`)
       
       // Clear local preview on error
       if (field === 'posterPath') {
         setLocalPosterPreview(null)
+        setPosterUploadSuccess(false)
       } else {
         setLocalBackdropPreview(null)
+        setBackdropUploadSuccess(false)
       }
     } finally {
       setUploadingImage(false)
@@ -509,11 +541,30 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
     if (field === 'posterPath') {
       setLocalPosterPreview(null)
       setPosterUploadSuccess(false)
+      setPosterUrlInput('')
     } else {
       setLocalBackdropPreview(null)
       setBackdropUploadSuccess(false)
+      setBackdropUrlInput('')
     }
     toast.success('Image removed successfully!')
+  }
+
+  const handleUrlInput = (url: string, field: 'posterPath' | 'backdropPath') => {
+    // Validate URL
+    try {
+      new URL(url)
+      setFormData(prev => ({ ...prev, [field]: url }))
+      if (field === 'posterPath') {
+        setPosterUrlInput(url)
+        toast.success('Poster URL set successfully!')
+      } else {
+        setBackdropUrlInput(url)
+        toast.success('Backdrop URL set successfully!')
+      }
+    } catch (error) {
+      toast.error('Please enter a valid URL')
+    }
   }
 
   return (
@@ -565,14 +616,13 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
             {/* Release Date */}
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                Release Date <span className="text-red-500">*</span>
+                Release Date
               </label>
               <input
                 type="date"
                 value={formData.releaseDate}
                 onChange={(e) => setFormData({...formData, releaseDate: e.target.value})}
                 className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white"
-                required
               />
             </div>
 
@@ -753,27 +803,85 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
                   </p>
                 </div>
               )}
+              {/* Toggle between Upload and URL */}
+              <div className="flex gap-2 mb-2">
+                <button
+                  type="button"
+                  onClick={() => setPosterInputMode('upload')}
+                  className={`flex-1 py-1.5 px-3 text-sm rounded transition-colors ${
+                    posterInputMode === 'upload'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white/10 text-white/60 hover:bg-white/20'
+                  }`}
+                >
+                  Upload File
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPosterInputMode('url')}
+                  className={`flex-1 py-1.5 px-3 text-sm rounded transition-colors ${
+                    posterInputMode === 'url'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white/10 text-white/60 hover:bg-white/20'
+                  }`}
+                >
+                  Use URL
+                </button>
+              </div>
               <div className="space-y-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) handleImageUpload(file, 'posterPath')
-                  }}
-                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white"
-                  disabled={uploadingImage}
-                />
-                {!formData.posterPath && !localPosterPreview && (
-                  <button
-                    type="button"
-                    onClick={() => (document.querySelector('input[type="file"]') as HTMLInputElement)?.click()}
-                    className="w-full py-2 border border-dashed border-white/30 rounded text-white/60 hover:text-white hover:border-white/50 transition-colors"
-                  >
-                    + Add Poster Image
-                  </button>
+                {posterInputMode === 'upload' ? (
+                  <>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) handleImageUpload(file, 'posterPath')
+                      }}
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white"
+                      disabled={uploadingImage}
+                    />
+                    {!formData.posterPath && !localPosterPreview && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const fileInput = document.querySelectorAll('input[type="file"]')[0] as HTMLInputElement
+                          fileInput?.click()
+                        }}
+                        className="w-full py-2 border border-dashed border-white/30 rounded text-white/60 hover:text-white hover:border-white/50 transition-colors"
+                      >
+                        + Add Poster Image
+                      </button>
+                    )}
+                    {uploadingImage && <p className="text-yellow-400 text-sm">Uploading...</p>}
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    <input
+                      type="url"
+                      value={posterUrlInput || formData.posterPath || ''}
+                      onChange={(e) => setPosterUrlInput(e.target.value)}
+                      onBlur={(e) => {
+                        if (e.target.value) {
+                          handleUrlInput(e.target.value, 'posterPath')
+                        }
+                      }}
+                      placeholder="https://example.com/image.jpg"
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white placeholder-white/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (posterUrlInput || formData.posterPath) {
+                          handleUrlInput(posterUrlInput || formData.posterPath || '', 'posterPath')
+                        }
+                      }}
+                      className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                    >
+                      Set URL
+                    </button>
+                  </div>
                 )}
-                {uploadingImage && <p className="text-yellow-400 text-sm">Uploading...</p>}
               </div>
             </div>
 
@@ -804,27 +912,85 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
                   </p>
                 </div>
               )}
+              {/* Toggle between Upload and URL */}
+              <div className="flex gap-2 mb-2">
+                <button
+                  type="button"
+                  onClick={() => setBackdropInputMode('upload')}
+                  className={`flex-1 py-1.5 px-3 text-sm rounded transition-colors ${
+                    backdropInputMode === 'upload'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white/10 text-white/60 hover:bg-white/20'
+                  }`}
+                >
+                  Upload File
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBackdropInputMode('url')}
+                  className={`flex-1 py-1.5 px-3 text-sm rounded transition-colors ${
+                    backdropInputMode === 'url'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white/10 text-white/60 hover:bg-white/20'
+                  }`}
+                >
+                  Use URL
+                </button>
+              </div>
               <div className="space-y-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) handleImageUpload(file, 'backdropPath')
-                  }}
-                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white"
-                  disabled={uploadingImage}
-                />
-                {!formData.backdropPath && !localBackdropPreview && (
-                  <button
-                    type="button"
-                    onClick={() => (document.querySelectorAll('input[type="file"]')[1] as HTMLInputElement)?.click()}
-                    className="w-full py-2 border border-dashed border-white/30 rounded text-white/60 hover:text-white hover:border-white/50 transition-colors"
-                  >
-                    + Add Backdrop Image
-                  </button>
+                {backdropInputMode === 'upload' ? (
+                  <>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) handleImageUpload(file, 'backdropPath')
+                      }}
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white"
+                      disabled={uploadingImage}
+                    />
+                    {!formData.backdropPath && !localBackdropPreview && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const fileInput = document.querySelectorAll('input[type="file"]')[1] as HTMLInputElement
+                          fileInput?.click()
+                        }}
+                        className="w-full py-2 border border-dashed border-white/30 rounded text-white/60 hover:text-white hover:border-white/50 transition-colors"
+                      >
+                        + Add Backdrop Image
+                      </button>
+                    )}
+                    {uploadingImage && <p className="text-yellow-400 text-sm">Uploading...</p>}
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    <input
+                      type="url"
+                      value={backdropUrlInput || formData.backdropPath || ''}
+                      onChange={(e) => setBackdropUrlInput(e.target.value)}
+                      onBlur={(e) => {
+                        if (e.target.value) {
+                          handleUrlInput(e.target.value, 'backdropPath')
+                        }
+                      }}
+                      placeholder="https://example.com/image.jpg"
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white placeholder-white/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (backdropUrlInput || formData.backdropPath) {
+                          handleUrlInput(backdropUrlInput || formData.backdropPath || '', 'backdropPath')
+                        }
+                      }}
+                      className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                    >
+                      Set URL
+                    </button>
+                  </div>
                 )}
-                {uploadingImage && <p className="text-yellow-400 text-sm">Uploading...</p>}
               </div>
             </div>
 
@@ -1047,6 +1213,34 @@ function CreateMovieModal({ onClose, onSubmit }: { onClose: () => void, onSubmit
 
 // Edit Movie Modal Component
 function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: () => void, onSubmit: (data: Partial<CreateMovieData>) => void }) {
+  // LOG: Check what movie data is received
+  console.log('🔍 [EditMovieModal] Movie data received:', {
+    movie,
+    releaseDate: movie.releaseDate,
+    releaseDateType: typeof movie.releaseDate,
+    genres: movie.genres,
+    cast: movie.cast,
+    crew: movie.crew,
+    productionCompanies: movie.productionCompanies,
+    images: movie.images,
+    allFields: Object.keys(movie)
+  })
+
+  // Format releaseDate for date input (YYYY-MM-DD)
+  const formatDateForInput = (date: string | Date | undefined): string => {
+    if (!date) return ''
+    try {
+      const dateObj = typeof date === 'string' ? new Date(date) : date
+      const year = dateObj.getFullYear()
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0')
+      const day = String(dateObj.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    } catch (error) {
+      console.error('❌ [EditMovieModal] Error formatting date:', error, date)
+      return ''
+    }
+  }
+
   const [formData, setFormData] = useState<Partial<CreateMovieData>>({
     title: movie.title,
     originalTitle: movie.originalTitle,
@@ -1054,7 +1248,7 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
     adult: movie.adult,
     backdropPath: movie.backdropPath,
     posterPath: movie.posterPath,
-    releaseDate: movie.releaseDate,
+    releaseDate: formatDateForInput(movie.releaseDate),
     runtime: movie.runtime,
     originalLanguage: movie.originalLanguage,
     spokenLanguages: movie.spokenLanguages,
@@ -1062,17 +1256,25 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
     voteCount: movie.voteCount,
     popularity: movie.popularity,
     censorship: movie.censorship,
-    genres: movie.genres?.map(g => g.id) || [],
+    genres: movie.genres?.map(g => {
+      if (typeof g === 'string') return g
+      // Handle both _id (MongoDB) and id (entity)
+      return (g as any)?._id || (g as any)?.id || ''
+    }).filter(Boolean) || [],
     cast: movie.cast?.map(c => ({
-      person: c.person.name || c.person.id,
+      person: typeof c.person === 'string' ? c.person : (c.person?.name || c.person?.id || ''),
       character: c.character,
       order: c.order
-    })) || [],
+    })).filter(c => c.person) || [],
     crew: movie.crew?.map(c => ({
-      person: c.person.name || c.person.id,
+      person: typeof c.person === 'string' ? c.person : (c.person?.name || c.person?.id || ''),
       job: c.job
-    })) || [],
-    productionCompanies: movie.productionCompanies?.map(pc => pc.id) || [],
+    })).filter(c => c.person) || [],
+    productionCompanies: movie.productionCompanies?.map(pc => {
+      if (typeof pc === 'string') return pc
+      // Handle both _id (MongoDB) and id (entity)
+      return (pc as any)?._id || (pc as any)?.id || ''
+    }).filter(Boolean) || [],
     trailerUrl: movie.trailerUrl,
     images: movie.images,
     isPromoted: movie.isPromoted,
@@ -1083,12 +1285,27 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
     isActive: movie.isActive
   })
 
+  // LOG: Check what formData is initialized with
+  console.log('🔍 [EditMovieModal] FormData initialized:', {
+    formData,
+    releaseDate: formData.releaseDate,
+    genres: formData.genres,
+    cast: formData.cast,
+    crew: formData.crew,
+    productionCompanies: formData.productionCompanies,
+    images: formData.images
+  })
+
   const [loading, setLoading] = useState(false)
   const [uploadingImage, setUploadingImage] = useState(false)
   const [localPosterPreview, setLocalPosterPreview] = useState<string | null>(null)
   const [localBackdropPreview, setLocalBackdropPreview] = useState<string | null>(null)
   const [posterUploadSuccess, setPosterUploadSuccess] = useState(false)
   const [backdropUploadSuccess, setBackdropUploadSuccess] = useState(false)
+  const [posterInputMode, setPosterInputMode] = useState<'upload' | 'url'>('upload')
+  const [backdropInputMode, setBackdropInputMode] = useState<'upload' | 'url'>('upload')
+  const [posterUrlInput, setPosterUrlInput] = useState('')
+  const [backdropUrlInput, setBackdropUrlInput] = useState('')
   const [persons, setPersons] = useState<Person[]>([])
   const [loadingPersons, setLoadingPersons] = useState(false)
 
@@ -1110,10 +1327,31 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
     loadPersons()
   }, [])
 
+  // Initialize URL inputs when formData changes
+  useEffect(() => {
+    if (formData.posterPath && !posterUrlInput) {
+      setPosterUrlInput(formData.posterPath)
+    }
+    if (formData.backdropPath && !backdropUrlInput) {
+      setBackdropUrlInput(formData.backdropPath)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.posterPath, formData.backdropPath])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
+      // LOG: Check what data is being submitted
+      console.log('🔍 [EditMovieModal] Submitting formData:', {
+        formData,
+        releaseDate: formData.releaseDate,
+        genres: formData.genres,
+        cast: formData.cast,
+        crew: formData.crew,
+        productionCompanies: formData.productionCompanies
+      })
+
       // Clean up data before sending
       const cleanedData = {
         ...formData,
@@ -1126,6 +1364,17 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
           person: persons.find(p => p.name === member.person)?._id || persons.find(p => p.name === member.person)?.id || member.person
         })) || []
       }
+
+      // LOG: Check cleaned data before sending
+      console.log('🔍 [EditMovieModal] Cleaned data to submit:', {
+        cleanedData,
+        releaseDate: cleanedData.releaseDate,
+        genres: cleanedData.genres,
+        cast: cleanedData.cast,
+        crew: cleanedData.crew,
+        productionCompanies: cleanedData.productionCompanies
+      })
+
       await onSubmit(cleanedData)
     } finally {
       setLoading(false)
@@ -1147,28 +1396,32 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
 
     setUploadingImage(true)
     try {
-      // Use direct Cloudinary upload
-      const imageUrl = await movieApiService.uploadToCloudinary(file)
-      setFormData(prev => ({ ...prev, [field]: imageUrl }))
-      toast.success('Image uploaded successfully!')
+      // Convert to base64 and pass to backend (backend will handle S3 upload)
+      const base64Data = await movieApiService.convertToBase64(file)
+      
+      // Set base64 data directly in formData (backend will upload to S3)
+      setFormData(prev => ({ ...prev, [field]: base64Data }))
+      toast.success('Image ready! Will upload to S3 when you save the movie.')
       
       // Set upload success state
       if (field === 'posterPath') {
         setPosterUploadSuccess(true)
-        setLocalPosterPreview(null)
+        setPosterUrlInput('')
       } else {
         setBackdropUploadSuccess(true)
-        setLocalBackdropPreview(null)
+        setBackdropUrlInput('')
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to upload image'
+      const errorMessage = error instanceof Error ? error.message : 'Failed to process image'
       toast.error(`Upload failed: ${errorMessage}`)
       
       // Clear local preview on error
       if (field === 'posterPath') {
         setLocalPosterPreview(null)
+        setPosterUploadSuccess(false)
       } else {
         setLocalBackdropPreview(null)
+        setBackdropUploadSuccess(false)
       }
     } finally {
       setUploadingImage(false)
@@ -1180,11 +1433,30 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
     if (field === 'posterPath') {
       setLocalPosterPreview(null)
       setPosterUploadSuccess(false)
+      setPosterUrlInput('')
     } else {
       setLocalBackdropPreview(null)
       setBackdropUploadSuccess(false)
+      setBackdropUrlInput('')
     }
     toast.success('Image removed successfully!')
+  }
+
+  const handleUrlInput = (url: string, field: 'posterPath' | 'backdropPath') => {
+    // Validate URL
+    try {
+      new URL(url)
+      setFormData(prev => ({ ...prev, [field]: url }))
+      if (field === 'posterPath') {
+        setPosterUrlInput(url)
+        toast.success('Poster URL set successfully!')
+      } else {
+        setBackdropUrlInput(url)
+        toast.success('Backdrop URL set successfully!')
+      }
+    } catch (error) {
+      toast.error('Please enter a valid URL')
+    }
   }
 
   return (
@@ -1236,14 +1508,13 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
             {/* Release Date */}
             <div>
               <label className="block text-sm font-medium text-white mb-1">
-                Release Date <span className="text-red-500">*</span>
+                Release Date
               </label>
               <input
                 type="date"
                 value={formData.releaseDate}
                 onChange={(e) => setFormData({...formData, releaseDate: e.target.value})}
                 className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white"
-                required
               />
             </div>
 
@@ -1417,27 +1688,85 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
                   </div>
                 </div>
               )}
+              {/* Toggle between Upload and URL */}
+              <div className="flex gap-2 mb-2">
+                <button
+                  type="button"
+                  onClick={() => setPosterInputMode('upload')}
+                  className={`flex-1 py-1.5 px-3 text-sm rounded transition-colors ${
+                    posterInputMode === 'upload'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white/10 text-white/60 hover:bg-white/20'
+                  }`}
+                >
+                  Upload File
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPosterInputMode('url')}
+                  className={`flex-1 py-1.5 px-3 text-sm rounded transition-colors ${
+                    posterInputMode === 'url'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white/10 text-white/60 hover:bg-white/20'
+                  }`}
+                >
+                  Use URL
+                </button>
+              </div>
               <div className="space-y-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) handleImageUpload(file, 'posterPath')
-                  }}
-                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white"
-                  disabled={uploadingImage}
-                />
-                {!formData.posterPath && (
-                  <button
-                    type="button"
-                    onClick={() => (document.querySelectorAll('input[type="file"]')[2] as HTMLInputElement)?.click()}
-                    className="w-full py-2 border border-dashed border-white/30 rounded text-white/60 hover:text-white hover:border-white/50 transition-colors"
-                  >
-                    + Add New Poster
-                  </button>
+                {posterInputMode === 'upload' ? (
+                  <>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) handleImageUpload(file, 'posterPath')
+                      }}
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white"
+                      disabled={uploadingImage}
+                    />
+                    {!formData.posterPath && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const fileInput = document.querySelectorAll('input[type="file"]')[2] as HTMLInputElement
+                          fileInput?.click()
+                        }}
+                        className="w-full py-2 border border-dashed border-white/30 rounded text-white/60 hover:text-white hover:border-white/50 transition-colors"
+                      >
+                        + Add New Poster
+                      </button>
+                    )}
+                    {uploadingImage && <p className="text-yellow-400 text-sm">Uploading...</p>}
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    <input
+                      type="url"
+                      value={posterUrlInput || formData.posterPath || ''}
+                      onChange={(e) => setPosterUrlInput(e.target.value)}
+                      onBlur={(e) => {
+                        if (e.target.value) {
+                          handleUrlInput(e.target.value, 'posterPath')
+                        }
+                      }}
+                      placeholder="https://example.com/image.jpg"
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white placeholder-white/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (posterUrlInput || formData.posterPath) {
+                          handleUrlInput(posterUrlInput || formData.posterPath || '', 'posterPath')
+                        }
+                      }}
+                      className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                    >
+                      Set URL
+                    </button>
+                  </div>
                 )}
-                {uploadingImage && <p className="text-yellow-400 text-sm">Uploading...</p>}
               </div>
             </div>
 
@@ -1461,27 +1790,85 @@ function EditMovieModal({ movie, onClose, onSubmit }: { movie: Movie, onClose: (
                   </div>
                 </div>
               )}
+              {/* Toggle between Upload and URL */}
+              <div className="flex gap-2 mb-2">
+                <button
+                  type="button"
+                  onClick={() => setBackdropInputMode('upload')}
+                  className={`flex-1 py-1.5 px-3 text-sm rounded transition-colors ${
+                    backdropInputMode === 'upload'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white/10 text-white/60 hover:bg-white/20'
+                  }`}
+                >
+                  Upload File
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBackdropInputMode('url')}
+                  className={`flex-1 py-1.5 px-3 text-sm rounded transition-colors ${
+                    backdropInputMode === 'url'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white/10 text-white/60 hover:bg-white/20'
+                  }`}
+                >
+                  Use URL
+                </button>
+              </div>
               <div className="space-y-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) handleImageUpload(file, 'backdropPath')
-                  }}
-                  className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white"
-                  disabled={uploadingImage}
-                />
-                {!formData.backdropPath && (
-                  <button
-                    type="button"
-                    onClick={() => (document.querySelectorAll('input[type="file"]')[3] as HTMLInputElement)?.click()}
-                    className="w-full py-2 border border-dashed border-white/30 rounded text-white/60 hover:text-white hover:border-white/50 transition-colors"
-                  >
-                    + Add New Backdrop
-                  </button>
+                {backdropInputMode === 'upload' ? (
+                  <>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0]
+                        if (file) handleImageUpload(file, 'backdropPath')
+                      }}
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white"
+                      disabled={uploadingImage}
+                    />
+                    {!formData.backdropPath && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const fileInput = document.querySelectorAll('input[type="file"]')[3] as HTMLInputElement
+                          fileInput?.click()
+                        }}
+                        className="w-full py-2 border border-dashed border-white/30 rounded text-white/60 hover:text-white hover:border-white/50 transition-colors"
+                      >
+                        + Add New Backdrop
+                      </button>
+                    )}
+                    {uploadingImage && <p className="text-yellow-400 text-sm">Uploading...</p>}
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    <input
+                      type="url"
+                      value={backdropUrlInput || formData.backdropPath || ''}
+                      onChange={(e) => setBackdropUrlInput(e.target.value)}
+                      onBlur={(e) => {
+                        if (e.target.value) {
+                          handleUrlInput(e.target.value, 'backdropPath')
+                        }
+                      }}
+                      placeholder="https://example.com/image.jpg"
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white placeholder-white/50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (backdropUrlInput || formData.backdropPath) {
+                          handleUrlInput(backdropUrlInput || formData.backdropPath || '', 'backdropPath')
+                        }
+                      }}
+                      className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
+                    >
+                      Set URL
+                    </button>
+                  </div>
                 )}
-                {uploadingImage && <p className="text-yellow-400 text-sm">Uploading...</p>}
               </div>
             </div>
 
