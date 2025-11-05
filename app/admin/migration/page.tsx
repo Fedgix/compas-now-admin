@@ -437,6 +437,9 @@ export default function MigrationPage() {
                       Status
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Preview
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Old URL
                     </th>
                   </tr>
@@ -469,6 +472,26 @@ export default function MigrationPage() {
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusBadgeColor(image.status)}`}>
                           {image.status}
                         </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="relative group">
+                          <img
+                            src={image.oldUrl}
+                            alt={`${image.field} preview`}
+                            className="w-16 h-16 object-cover rounded border border-gray-300 cursor-pointer hover:scale-150 hover:z-10 transition-transform"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none'
+                              const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                              if (fallback) {
+                                fallback.classList.remove('hidden')
+                                fallback.classList.add('flex')
+                              }
+                            }}
+                          />
+                          <div className="hidden w-16 h-16 bg-gray-100 rounded border border-gray-300 items-center justify-center text-xs text-gray-400">
+                            No Preview
+                          </div>
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
                         <a
@@ -566,6 +589,7 @@ export default function MigrationPage() {
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-red-800 uppercase">Entity ID</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-red-800 uppercase">Field</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-red-800 uppercase">Preview</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-red-800 uppercase">Old URL</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-red-800 uppercase">Error</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-red-800 uppercase">Actions</th>
@@ -578,6 +602,26 @@ export default function MigrationPage() {
                     <td className="px-4 py-3 text-sm text-gray-900">
                       {log.field}
                       {log.fieldIndex !== null && `[${log.fieldIndex}]`}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="relative group">
+                        <img
+                          src={log.oldUrl}
+                          alt={`${log.field} preview`}
+                          className="w-16 h-16 object-cover rounded border border-gray-300 cursor-pointer hover:scale-150 hover:z-10 transition-transform"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none'
+                            const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                            if (fallback) {
+                              fallback.classList.remove('hidden')
+                              fallback.classList.add('flex')
+                            }
+                          }}
+                        />
+                        <div className="hidden w-16 h-16 bg-gray-100 rounded border border-gray-300 items-center justify-center text-xs text-gray-400">
+                          No Preview
+                        </div>
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900 max-w-xs truncate">
                       <a
