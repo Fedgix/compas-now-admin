@@ -4,6 +4,7 @@
  */
 
 import { apiService } from './api'
+import { getCurrentConfig } from './config'
 
 interface User {
   _id: string
@@ -167,22 +168,33 @@ export const userApi = {
     return response
   },
 
-  // Export users
-  exportUsers: async (format: 'csv' | 'json' = 'csv', filters: UserFilters = {}): Promise<Blob> => {
+  // Export users to Excel
+  exportUsers: async (format: 'xls' | 'csv' | 'json' = 'xls', filters: UserFilters = {}): Promise<Blob> => {
     const queryParams = new URLSearchParams()
     queryParams.append('format', format)
     
     if (filters.search) queryParams.append('search', filters.search)
-    if (filters.status) queryParams.append('status', filters.status)
+    if (filters.status && filters.status !== 'all') queryParams.append('status', filters.status)
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/admin/users/export?${queryParams.toString()}`, {
+    const envConfig = getCurrentConfig()
+    const baseUrl = envConfig.baseUrl || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+    const token = localStorage.getItem('admin_access_token') || localStorage.getItem('admin_token')
+
+    const response = await fetch(`${baseUrl}/admin/users/export?${queryParams.toString()}`, {
+      method: 'GET',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        'Authorization': `Bearer ${token}`,
+        'Accept': format === 'xls' || format === 'xlsx' 
+          ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+          : format === 'csv' 
+          ? 'text/csv' 
+          : 'application/json'
       }
     })
 
     if (!response.ok) {
-      throw new Error('Failed to export users')
+      const errorText = await response.text()
+      throw new Error(`Failed to export users: ${errorText}`)
     }
 
     return response.blob()

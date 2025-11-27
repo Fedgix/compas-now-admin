@@ -21,6 +21,7 @@ export default function UsersPage() {
   const [showUserDetailsModal, setShowUserDetailsModal] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive' | 'verified' | 'unverified'>('all')
+  const [isExporting, setIsExporting] = useState(false)
   const { currentConfig } = useEnvironment()
 
   // Fetch users data
@@ -61,6 +62,35 @@ export default function UsersPage() {
       }
       
     } catch (error: any) {
+    }
+  }
+
+  // Export users to Excel
+  const handleExportUsers = async () => {
+    try {
+      setIsExporting(true)
+      
+      const blob = await userApi.exportUsers('xls', {
+        search: searchTerm || undefined,
+        status: filterStatus !== 'all' ? filterStatus : undefined
+      })
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `users-${new Date().toISOString().split('T')[0]}.xlsx`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      toast.success('Users exported successfully!')
+    } catch (error: any) {
+      console.error('Export error:', error)
+      toast.error(error.message || 'Failed to export users')
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -265,12 +295,33 @@ export default function UsersPage() {
           <h1 className="text-2xl font-bold text-white">User Management</h1>
           <p className="text-white/60">Manage all users and their accounts</p>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="btn-primary px-4 py-2"
-        >
-          + Create User
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={handleExportUsers}
+            disabled={isExporting}
+            className="btn-secondary px-4 py-2 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isExporting ? (
+              <>
+                <LoadingSpinner size="sm" />
+                Exporting...
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download Excel
+              </>
+            )}
+          </button>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="btn-primary px-4 py-2"
+          >
+            + Create User
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}
