@@ -14,11 +14,15 @@ const menuItems = [
   { href: '/admin/events', label: 'Events', icon: '🎬' },
   { href: '/admin/movies', label: 'Movies', icon: '🎞️' },
   { href: '/admin/persons', label: 'Persons', icon: '👤' },
+  { href: '/admin/production-companies', label: 'Production Companies', icon: '🏢' },
   { href: '/admin/users', label: 'Users', icon: '👥' },
   { href: '/admin/users/analytics', label: 'Users Analytics', icon: '📈' },
+  { href: '/admin/users/statistics', label: 'User Statistics', icon: '📊' },
   { href: '/admin/bookings', label: 'Bookings', icon: '🎫' },
   { href: '/admin/coupons', label: 'Discount Coupons', icon: '🎟️' },
   { href: '/admin/payments', label: 'Payments', icon: '💳' },
+  { href: '/admin/payments/analytics', label: 'Payments Analytics', icon: '📈' },
+  { href: '/admin/sales/statistics', label: 'Sales Statistics', icon: '💰' },
   { href: '/admin/easebuzz-transactions', label: 'Easebuzz Transactions', icon: '📊' },
   { href: '/admin/migration', label: 'Image Migration', icon: '🔄' },
   { 
@@ -29,6 +33,7 @@ const menuItems = [
       { href: '/admin/subscription-plans', label: 'Subscription Plans', icon: '🎭' },
       { href: '/admin/welcome-pass', label: 'Welcome Pass', icon: '🎁' },
       { href: '/admin/user-migration', label: 'User Migration', icon: '🔄' },
+      { href: '/admin/movie-pass-release', label: 'Pass Release', icon: '📤' },
       { href: '/admin/movie-passes/analytics', label: 'Movie Pass Batches', icon: '📦' },
       { href: '/admin/movie-passes/import-excel', label: 'Import Excel', icon: '📊' },
       { 
@@ -141,7 +146,7 @@ export default function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
       <aside className={`
         fixed top-0 left-0 h-screen w-64 admin-sidebar z-50 transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:z-auto lg:h-screen
+        lg:translate-x-0 lg:static lg:h-screen
       `}>
         <div className="flex flex-col h-full">
           {/* Header */}
